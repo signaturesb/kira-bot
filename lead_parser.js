@@ -4,6 +4,10 @@
 // • Validation anti-faux-positifs (nom du courtier, mots génériques)
 // • parseLeadEmailWithAI merge amélioré (AI comble regex, jamais l'inverse)
 // • Exports centralisés pour bot.js
+// ─── PATCH 2026-04-24b ──────────────────────────────────────────────────────
+// • Blacklist numéro de Shawn (5149271340) dans isValidPhone
+// • Détection notifications Realtor.ca "listing affichée" dans isJunkLeadEmail
+//   (lead ID lead_1776970648487 — Route 337 Sainte-Julienne — notification listing auto)
 // ─────────────────────────────────────────────────────────────────────────────
 'use strict';
 
@@ -18,7 +22,6 @@ const LEAD_EMAIL_PATTERNS = [
 const LEAD_SUBJECT_RE = /demande|lead|prospect|contact|information|intéress|inquiry|visite|acheteur|request/i;
 
 // ─── Noms à rejeter absolument comme prospect ────────────────────────────────
-// Toute extraction qui retourne un de ces noms = parsing raté = fallback AI
 const AGENT_NAMES = [
   'shawn barrette', 'shawn', 'barrette',
   'julie', 'julie signaturesb',
@@ -36,27 +39,28 @@ const GENERIC_WORDS = [
   'maison', 'propriété', 'immeuble', 'plex',
 ];
 
+// ─── Téléphones de l'équipe Signature SB — jamais un prospect ───────────────
+// PATCH 2026-04-24b: blacklister numéros internes pour éviter faux leads
+const AGENT_PHONES = [
+  '5149271340', // Shawn Barrette
+  '4509271340', // variante possible
+];
+
 function isValidProspectName(nom) {
   if (!nom || nom.length < 3) return false;
   const lower = nom.toLowerCase().trim();
-  // Rejeter noms d'agent
   if (AGENT_NAMES.some(a => lower === a || lower.includes(a))) return false;
-  // Rejeter mots génériques
   if (GENERIC_WORDS.some(w => lower === w)) return false;
-  // Doit avoir au moins 2 mots (prénom + nom)
   const words = nom.trim().split(/\s+/);
   if (words.length < 2) return false;
-  // Chaque mot doit commencer par majuscule
   const allCap = words.every(w => /^[A-ZÀ-Ü]/.test(w));
   if (!allCap) return false;
-  // Longueur raisonnable
   if (nom.length > 60) return false;
   return true;
 }
 
 function isValidEmail(email) {
   if (!email) return false;
-  // Exclure emails internes/système
   const lower = email.toLowerCase();
   const blocked = [
     'signaturesb', 'remax', 'centris', 'noreply', 'no-reply',
@@ -64,15 +68,20 @@ function isValidEmail(email) {
     'notification', 'brevo', 'brevosend', 'mailchimp',
   ];
   if (blocked.some(b => lower.includes(b))) return false;
-  // Format valide
   return /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email);
 }
 
 function isValidPhone(tel) {
   if (!tel) return false;
   const digits = tel.replace(/\D/g, '');
-  // 10 chiffres North America (ou 11 avec +1)
-  return digits.length === 10 || (digits.length === 11 && digits[0] === '1');
+  // 10 chiffres NA (ou 11 avec +1)
+  const valid = digits.length === 10 || (digits.length === 11 && digits[0] === '1');
+  if (!valid) return false;
+  // ─── PATCH 2026-04-24b: rejeter numéros de l'équipe Signature SB ───────────
+  const normalized = digits.length === 11 ? digits.slice(1) : digits;
+  if (AGENT_PHONES.includes(normalized)) return false;
+  // ────────────────────────────────────────────────────────────────────────────
+  return true;
 }
 
 function detectLeadSource(from, subject) {
@@ -96,6 +105,30 @@ function isJunkLeadEmail(subject, from, body) {
   if (isCentrisAuto) {
     if (/notification|r[eé]pondent\s+à\s+vos\s+crit[eè]res|d[eé]couvrez-les|inscriptions?\s+(correspondantes|matching|nouvelles)|une\s+ou\s+plusieurs\s+nouvelles\s+propri[eé]t[eé]s|voir\s+les\s+inscriptions/i.test(sb)) return true;
   }
+
+  // ─── PATCH 2026-04-24b: Notifications Realtor.ca/CREA "listing affichée" ───
+  // Ces emails indiquent que TON listing a été publié sur Realtor.ca — PAS un prospect
+  // Ex: "L'inscription pour l'adresse X est maintenant affichée sur REAL"
+  //     "Your listing at X is now live on REALTOR.ca"
+  //     "est maintenant affichée sur REAL" (truncated)
+  if (/realtor|crea\.ca/i.test(f)) {
+    // Notifications de statut d'inscription — pas un prospect
+    if (/est maintenant affich[eé]e?\s+sur\s+real/i.test(sb)) return true;
+    if (/is now (?:live|active|displayed)\s+on\s+real/i.test(sb)) return true;
+    if (/inscription\s+pour\s+l'adresse.+affich/i.test(sb)) return true;
+    if (/listing\s+(?:for|at|à).+(?:now live|active|published|affich)/i.test(sb)) return true;
+    if (/votre\s+(?:inscription|listing)\s+est\s+(?:maintenant|désormais)/i.test(sb)) return true;
+    if (/your\s+(?:listing|property)\s+(?:has been|is now)\s+(?:published|live|active)/i.test(sb)) return true;
+    // Alertes de performance (vues, clics) sur Realtor.ca
+    if (/(?:vues?|views?|clicks?|clics?|impressions?)\s+(?:sur|on)\s+(?:votre|your)\s+(?:inscription|listing)/i.test(sb)) return true;
+    // Confirmation de soumission listing
+    if (/(?:inscription|listing)\s+(?:soumise?|submitted|confirmée?|confirmed)/i.test(sb)) return true;
+  }
+
+  // Notifications REAL (CREA/Realtor backend)
+  if (/\breal(?:tor)?\b.*\baffich/i.test(s)) return true;
+  if (/est maintenant affich/i.test(s)) return true;
+
   // Pattern sujet saved-search typique
   if (/^\[[^\]]+\]\s+(maison|terrain|plex|condo|chalet)\b/i.test(s)) return true;
   // Newsletters / promotions
@@ -122,8 +155,6 @@ function parseLeadEmail(body, subject, from) {
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s{2,}/g, ' ');
 
-  // NOTE: on N'inclut PAS le champ `from` dans full pour le nom — risque de capturer
-  // le nom du courtier si l'email vient de "Shawn Barrette via Centris"
   const full = `${subject || ''} ${clean}`;
   const fullWithFrom = `${full} ${from || ''}`;
 
@@ -146,7 +177,6 @@ function parseLeadEmail(body, subject, from) {
     new RegExp(`(?:Bonjour|Salut|Hello),?\\s+(${UC}\\s+${UC})\\b`),
   );
 
-  // ✅ VALIDATION: si le nom extrait est invalide → on vide pour forcer fallback AI
   if (!isValidProspectName(nom)) nom = '';
 
   // Téléphone
@@ -159,7 +189,7 @@ function parseLeadEmail(body, subject, from) {
   }
   if (!isValidPhone(telephone)) telephone = '';
 
-  // Email — préférer label, puis scan avec filtres stricts
+  // Email
   let email = '';
   const emailLabelMatch = fullWithFrom.match(/(?:courriel|email|e-mail)\s*:?\s*([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})/i);
   if (emailLabelMatch && isValidEmail(emailLabelMatch[1])) {
@@ -177,109 +207,112 @@ function parseLeadEmail(body, subject, from) {
   const centris = extract(
     /\(#\s*(\d{7,9})\)/,
     /#\s*(\d{7,9})\b/,
-    /(?:centris|mls|inscription|listing)[^\d]{0,60}(\d{7,9})\b/i,
-    /\b(\d{8})\b/,
+    /(?:centris|mls|inscription|listing)[^\d]{0,10}(\d{7,9})\b/i,
+    /\b(\d{8,9})\b/,
   );
 
   // Adresse
   const adresse = extract(
-    /(?:adresse|propriét[eé]|property|address|bien)\s*:?\s*([^\n\r:;|<>]{10,80})/i,
-    /\b(\d+[,\s]+(?:rue|avenue|boul\.?|chemin|ch\.|rang|route|rte|place|pl\.|cour|court|dr\.?|blvd)[^\n\r:;|<>]{5,60})/i,
+    /(?:adresse|address|propriété|property|inscription|listing)\s*:?\s*([^\n\r]{10,80})/i,
+    /\b(\d{1,6}\s+(?:rue|chemin|boulevard|avenue|route|rang|ch\.|boul\.|blvd\.?)\s+[A-Za-zÀ-Üà-ü\s\-\'\.]{5,50})/i,
   );
 
-  // Type
+  // Type propriété
   let type = 'terrain';
-  const typeText = (full + ' ' + (adresse || '')).toLowerCase();
-  if (/maison|unifamili|résidenti|bungalow|cottage|chalet/i.test(typeText))  type = 'maison_usagee';
-  else if (/plex|duplex|triplex|quadruplex|multilogement/i.test(typeText))   type = 'plex';
-  else if (/construction\s+neuve|neuve?|new\s+build/i.test(typeText))        type = 'construction_neuve';
-  else if (/terrain|lot\b|land/i.test(typeText))                             type = 'terrain';
+  const typeText = full.toLowerCase();
+  if (/plex|duplex|triplex|quadruplex/i.test(typeText)) type = 'plex';
+  else if (/construction\s+neuve|maison\s+neuve|neuve?\s+construction/i.test(typeText)) type = 'maison_neuve';
+  else if (/maison|bungalow|cottage|résidence|résidentiel/i.test(typeText)) type = 'maison_usagee';
+  else if (/terrain|lot\b|lott|land/i.test(typeText)) type = 'terrain';
 
-  // Score qualité du parsing (0-100)
+  // Score qualité (0–100)
   let score = 0;
-  if (isValidProspectName(nom))  score += 35;
-  if (isValidEmail(email))       score += 35;
-  if (isValidPhone(telephone))   score += 20;
-  if (centris)                   score += 10;
+  if (nom) score += 35;
+  if (email) score += 30;
+  if (telephone) score += 20;
+  if (centris) score += 10;
+  if (adresse) score += 5;
 
-  return { nom, telephone, email, centris, adresse, type, _score: score };
+  return { nom, email, telephone, centris, adresse, type, _score: score };
 }
 
-// ─── AI FALLBACK ─────────────────────────────────────────────────────────────
-// Appelle Claude Haiku si score regex < 70 (nom ou email manquant)
-// Merge: regex est prioritaire, AI comble les vides
-// ─────────────────────────────────────────────────────────────────────────────
-async function parseLeadEmailWithAI(body, subject, from, regexResult, { apiKey, logger }) {
-  if (!apiKey) return regexResult;
-  const _log = logger || (() => {});
+async function parseLeadEmailWithAI(body, subject, from, claudeClient) {
+  // Phase 1: extraction regex
+  const regexResult = parseLeadEmail(body, subject, from);
 
-  // Si regex a tout (nom + email), pas besoin d'AI
-  if (isValidProspectName(regexResult.nom) && isValidEmail(regexResult.email)) {
-    _log('INFO', 'PARSER', `Score regex suffisant (${regexResult._score}) — skip AI`);
-    return regexResult;
-  }
+  // Si score suffisant, pas besoin d'AI
+  if (regexResult._score >= 70) return regexResult;
 
-  const clean = (body || '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
+  // Phase 2: fallback AI (Haiku — économique)
+  if (!claudeClient) return regexResult;
+
+  let clean = (body || '')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
     .replace(/\s{2,}/g, ' ')
-    .substring(0, 4000);
+    .substring(0, 3000); // limite tokens
 
-  const prompt = `Tu es un extracteur de données pour leads immobiliers. Extrais UNIQUEMENT les infos du CLIENT (pas du courtier Shawn Barrette, pas de RE/MAX, pas de Centris).
+  const prompt = `Tu es un parser de leads immobiliers pour Shawn Barrette (courtier RE/MAX).
+Extrais ces infos de l'email ci-dessous et retourne UNIQUEMENT du JSON valide, rien d'autre.
 
 IMPORTANT:
-- Le courtier s'appelle "Shawn Barrette" — NE JAMAIS retourner ce nom comme prospect
-- Si tu n'es pas sûr d'un champ, retourne ""
-- Retourne UNIQUEMENT du JSON valide
+- "nom": prénom + nom du PROSPECT (client potentiel), PAS du courtier ni de l'agent
+- Si c'est Shawn Barrette, Julie, ou un agent RE/MAX → laisser "nom": ""
+- "email": email du PROSPECT uniquement (pas @signaturesb.com, @remax.ca, @centris.ca)
+- "telephone": 10 chiffres canadiens du PROSPECT uniquement (pas 5149271340 qui est Shawn)
+- "centris": numéro à 7-9 chiffres de la propriété demandée
+- "adresse": adresse de la propriété (rue + ville)
+- "type": "terrain" | "maison_usagee" | "maison_neuve" | "plex"
 
-SUJET: ${subject}
-FROM: ${from}
-CORPS: ${clean}
+Format: {"nom":"","email":"","telephone":"","centris":"","adresse":"","type":"terrain"}
 
-Format JSON attendu:
-{"nom":"Prénom Nom du CLIENT uniquement","telephone":"10 chiffres ex 5149271340","email":"email du CLIENT uniquement","centris":"numéro 7-9 chiffres ou vide","adresse":"adresse propriété demandée ou vide","type":"terrain|maison_usagee|plex|construction_neuve"}`;
+Email:
+Sujet: ${subject || ''}
+De: ${from || ''}
+Corps: ${clean}`;
 
   try {
-    const Anthropic = require('@anthropic-ai/sdk');
-    const client = new Anthropic({ apiKey });
-    const response = await client.messages.create({
+    const response = await claudeClient.messages.create({
       model: 'claude-haiku-4-5',
-      max_tokens: 300,
+      max_tokens: 256,
       messages: [{ role: 'user', content: prompt }],
     });
 
-    const raw = response.content[0]?.text || '{}';
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) { _log('WARN', 'PARSER_AI', 'Aucun JSON dans réponse AI'); return regexResult; }
+    const aiText = response.content?.[0]?.text?.trim() || '';
+    const jsonMatch = aiText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return regexResult;
 
-    const ai = JSON.parse(jsonMatch[0]);
-    _log('INFO', 'PARSER_AI', `AI extrait: nom=${ai.nom} email=${ai.email} tel=${ai.telephone}`);
+    const aiResult = JSON.parse(jsonMatch[0]);
 
-    // ✅ Merge: regex prioritaire, AI comble si vide ET valide
-    const merged = {
-      nom:      isValidProspectName(regexResult.nom) ? regexResult.nom
-                : (isValidProspectName(ai.nom) ? ai.nom : regexResult.nom),
-      email:    isValidEmail(regexResult.email) ? regexResult.email
-                : (isValidEmail(ai.email) ? ai.email.toLowerCase() : regexResult.email),
-      telephone: isValidPhone(regexResult.telephone) ? regexResult.telephone
-                : (isValidPhone(ai.telephone) ? ai.telephone.replace(/\D/g,'').replace(/^1/,'') : regexResult.telephone),
-      centris:  regexResult.centris || ai.centris || '',
-      adresse:  regexResult.adresse || ai.adresse || '',
-      type:     regexResult.type || ai.type || 'terrain',
-      _score:   regexResult._score,
-      _aiUsed:  true,
-    };
-
-    // Validation finale: nom du courtier = échec parsing
-    if (!isValidProspectName(merged.nom)) {
-      _log('WARN', 'PARSER_AI', `Nom invalide après merge: "${merged.nom}" — prospect inconnu`);
-      merged.nom = '';
+    // Merge: regex a priorité, AI comble seulement ce qui est vide
+    // Valider chaque champ AI avant de l'utiliser
+    const merged = { ...regexResult };
+    if (!merged.nom && aiResult.nom && isValidProspectName(aiResult.nom)) {
+      merged.nom = aiResult.nom;
     }
+    if (!merged.email && aiResult.email && isValidEmail(aiResult.email)) {
+      merged.email = aiResult.email.toLowerCase();
+    }
+    if (!merged.telephone && aiResult.telephone && isValidPhone(aiResult.telephone)) {
+      merged.telephone = aiResult.telephone.replace(/\D/g, '').replace(/^1/, '');
+    }
+    if (!merged.centris && aiResult.centris) merged.centris = aiResult.centris;
+    if (!merged.adresse && aiResult.adresse) merged.adresse = aiResult.adresse;
+    if (aiResult.type) merged.type = aiResult.type;
+
+    // Recalculer score
+    merged._score = 0;
+    if (merged.nom) merged._score += 35;
+    if (merged.email) merged._score += 30;
+    if (merged.telephone) merged._score += 20;
+    if (merged.centris) merged._score += 10;
+    if (merged.adresse) merged._score += 5;
 
     return merged;
   } catch (e) {
-    _log('ERR', 'PARSER_AI', `Erreur AI: ${e.message}`);
+    // AI a échoué → retourner résultat regex
     return regexResult;
   }
 }
@@ -292,4 +325,7 @@ module.exports = {
   isValidProspectName,
   isValidEmail,
   isValidPhone,
+  LEAD_EMAIL_PATTERNS,
+  LEAD_SUBJECT_RE,
+  AGENT_PHONES,
 };
