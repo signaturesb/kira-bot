@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-04-22 23 h 32 min 06 s_
+_2026-04-22 23 h 36 min 40 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 39
-- Uptime: 17s
+- Uptime: 16s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -13,11 +13,12 @@ INFO|BOOT|Step 0: server.listen(10000) [CRITICAL]
 INFO|BOOT|Step 1: refresh Dropbox token
 OK|BOOT|HTTP server listening on port 10000
 OK|DROPBOX|Token rafraîchi ✓
-INFO|BOOT|Step 2: load Dropbox structure
+INFO|BOOT|Step 2: load Dropbox structure + index
 OK|DROPBOX|Structure: 34 terrains, 4 sections chargées
 INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory
+INFO|DBX_IDX|Auto-discovery: 18 dossiers top-level à indexer
 OK|GIST|1 faits chargés
 INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (11KB)
@@ -29,6 +30,7 @@ INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
 OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:1 — tools:39 — port:10000
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
+OK|DBX_IDX|Index: 119 dossiers, 630 fichiers · 5s · 58 Centris# · 81 tokens rue
 OK|PREFLIGHT|✅ Claude API accepte les 39 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
