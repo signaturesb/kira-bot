@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-04-22 23 h 47 min 32 s_
+_2026-04-22 23 h 49 min 27 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 39
-- Uptime: 17s
+- Uptime: 18s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -18,7 +18,7 @@ OK|DROPBOX|Structure: 34 terrains, 4 sections chargées
 INFO|DBX_IDX|Paths à indexer: /Inscription | /Terrain en ligne
 INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
-INFO|BOOT|Step 4: load memory
+INFO|BOOT|Step 4: load memory + history
 OK|GIST|1 faits chargés
 INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (11KB)
@@ -31,7 +31,7 @@ OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:1 — tools:
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
-OK|DBX_IDX|Index: 64 dossiers, 333 fichiers · 1s · 58 Centris# · 45 tokens rue
+OK|DBX_IDX|Index: 64 dossiers, 333 fichiers · 2s · 58 Centris# · 45 tokens rue
 OK|PREFLIGHT|✅ Claude API accepte les 39 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
