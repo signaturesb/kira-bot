@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-04-22 23 h 36 min 40 s_
+_2026-04-22 23 h 38 min 57 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 39
-- Uptime: 16s
+- Uptime: 17s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -30,7 +30,8 @@ INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
 OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:1 — tools:39 — port:10000
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
-OK|DBX_IDX|Index: 119 dossiers, 630 fichiers · 5s · 58 Centris# · 81 tokens rue
+OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
+OK|DBX_IDX|Index: 118 dossiers, 630 fichiers · 4s · 58 Centris# · 81 tokens rue
 OK|PREFLIGHT|✅ Claude API accepte les 39 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
