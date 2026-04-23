@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-04-23 00 h 57 min 15 s_
+_2026-04-23 01 h 04 min 02 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 39
-- Uptime: 18s
+- Uptime: 17s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -20,7 +20,7 @@ INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
 OK|GIST|23 faits chargés
-OK|GIST|History restauré depuis Gist: 2 messages sur 1 chats (dernière save: 2026-04-23T04:48:20.833Z)
+OK|GIST|History restauré depuis Gist: 2 messages sur 1 chats (dernière save: 2026-04-23T04:58:14.234Z)
 INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (4KB)
 OK|BOOT|Gmail Lead Poller + auto-trash CI noise activés
