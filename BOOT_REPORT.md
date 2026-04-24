@@ -1,5 +1,5 @@
 # ✅ Boot réussi
-_2026-04-23 22 h 17 min 04 s_
+_2026-04-23 22 h 18 min 50 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 39
@@ -34,9 +34,9 @@ OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
 OK|DBX_IDX|Index: 64 dossiers, 333 fichiers · 1s · 58 Centris# · 45 tokens rue
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
+OK|PREFLIGHT|✅ Claude API accepte les 39 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
-OK|PREFLIGHT|✅ Claude API accepte les 39 tools
 OK|GIST|Poller state restauré: 96 processed, 38 leads
 OK|GIST|Dedup restauré: 36 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
