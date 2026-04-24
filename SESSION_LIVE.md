@@ -16,6 +16,7 @@
 1. `LEAD_FLOW_FINAL.md` — instructions précises avec code prêt à copier
 2. `LEÇONS.md` — pièges connus (Render, Git, Opus)
 3. `ÉTAT_SYSTÈME.md` — architecture complète
+4. `FIRECRAWL_PROMPT_CLAUDE_CODE.md` — intégration Firecrawl complète (scraping municipal)
 
 ### Les 4 patches dans bot.js (dans cet ordre):
 
@@ -48,6 +49,62 @@ git push origin main
 curl https://signaturesb-bot-s272.onrender.com/health
 # Vérifier tools count + pas d'erreurs
 ```
+
+---
+
+## 🌐 INTÉGRATION FIRECRAWL — SCRAPING SITES MUNICIPAUX
+
+**Objectif:** Permettre à Kira de scraper les sites municipaux en temps réel (zonage, marges, permis, taxes)
+
+**Fichier instructions:** `FIRECRAWL_PROMPT_CLAUDE_CODE.md` dans ce repo
+
+### Étapes pour Shawn (AVANT Claude Code):
+1. Créer compte sur **firecrawl.dev** avec shawn@signaturesb.com
+2. Copier la clé API (`fc-xxxxx`)
+3. Render → ajouter variable d'environnement: `FIRECRAWL_API_KEY=fc-xxxxx`
+4. Render → ajouter: `FIRECRAWL_QUOTA_MONTHLY=500`
+
+### Ce que Claude Code va créer:
+- `firecrawl_scraper.js` — module complet avec cache, retry, quota
+- 2 nouveaux outils dans `bot.js`:
+  - `scraper_site_municipal(ville, sujet)` → retourne section exacte (ex: marges latérales)
+  - `scraper_url(url)` → scrape n'importe quelle URL directement
+
+### Fonctionnalités intégrées:
+- ✅ Cache MD5 persistant 30 jours sur `/data/firecrawl_cache/`
+- ✅ Retry 2x avec backoff exponentiel (1s → 2s)
+- ✅ Timeout 45s avec AbortController
+- ✅ Quota tracker mensuel (alerte à 80% = 400/500 pages)
+- ✅ Audit log JSONL pour debug
+- ✅ Fallback automatique: si scraping échoue → numéro téléphone municipal affiché
+- ✅ Commande `/firecrawl` → voir quota en direct
+- ✅ Extraction par mots-clés → sort direct la section "marges latérales" ou "zonage"
+
+### 8 villes pré-configurées:
+| Ville | URL Zonage | Téléphone |
+|-------|-----------|-----------|
+| Sainte-Julienne | sainte-julienne.ca/urbanisme | (450) 831-2929 |
+| Rawdon | rawdon.ca/services/urbanisme | (450) 834-2596 |
+| Chertsey | chertsey.ca/urbanisme | (450) 882-2920 |
+| Saint-Calixte | saint-calixte.ca/urbanisme | (450) 839-2002 |
+| Saint-Jean-de-Matha | saintjeandematha.ca/urbanisme | (450) 886-3826 |
+| Saint-Didace | saintdidace.ca | (450) 835-5597 |
+| MRC Matawinie | matawinie.org/amenagement | (450) 834-5441 |
+| MRC D'Autray | mrcautray.qc.ca | (450) 836-7007 |
+
+### Tests obligatoires après intégration:
+```bash
+node test_firecrawl.js  # 5 scénarios
+# 1. Cache miss → scrape réel
+# 2. Cache hit → retour immédiat
+# 3. Timeout simulation → fallback téléphone
+# 4. Quota 80% → alerte Telegram
+# 5. Extraction mots-clés → section exacte retournée
+```
+
+### Résultat attendu:
+Shawn dit: *"Grille zonage Sainte-Julienne marges latérales"*
+→ Kira retourne en 3 secondes la section exacte du règlement de zonage ✅
 
 ---
 
@@ -126,6 +183,9 @@ alerte manuelle Shawn (aucun docs envoyés)
 - [ ] P2 Retry — tester avec `envoyerDocsAuto()` qui throw intentionnellement
 - [ ] P1 Validation — tester avec email Centris qui a nom = "Shawn Barrette"
 - [ ] P4 Pending — tester commande "nom Jean Tremblay" après lead pending
+- [ ] Firecrawl — `node test_firecrawl.js` → 5/5 scénarios passent
+- [ ] Firecrawl — `/firecrawl` affiche quota correct
+- [ ] Firecrawl — "grille zonage Sainte-Julienne" retourne marges latérales
 - [ ] /health — 40+ tools, 0 erreurs
 - [ ] /checkemail — scan 48h sans crash
 - [ ] Lead réel test — confirmer parsing correct + docs envoyés + Shawn en Bcc
