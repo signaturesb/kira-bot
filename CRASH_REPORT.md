@@ -1,5 +1,5 @@
 # 🚨 uncaughtException
-_2026-04-23 21 h 58 min 10 s_
+_2026-04-23 22 h 04 min 24 s_
 
 ## Erreur
 ```
@@ -24,7 +24,7 @@ ReferenceError: Cannot access 'pendingDocSends' before initialization
 ## Environnement
 - Node: v22.22.0
 - Platform: linux
-- Memory: {"rss":81801216,"heapTotal":19484672,"heapUsed":17394784,"external":2504616,"arrayBuffers":37835}
+- Memory: {"rss":82059264,"heapTotal":19501056,"heapUsed":17270352,"external":2504616,"arrayBuffers":37835}
 - Env vars présents: 140
 
 **Claude Code peut lire ce fichier avec:**
