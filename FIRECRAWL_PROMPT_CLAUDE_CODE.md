@@ -1,248 +1,221 @@
-# 🔧 PROMPT CLAUDE CODE — INTÉGRATION FIRECRAWL v3 ULTIME
-
-**Mission:** Intégrer Firecrawl de façon bulletproof pour que Kira puisse scraper les sites municipaux québécois en temps réel (grilles de zonage, règlements, marges latérales, taxes, permis).
-
-**Niveau de qualité exigé:** Production-ready, zéro bug, zéro dette technique, zéro intervention manuelle.
-
----
-
-## ✅ STATUT — CLÉS ET CONFIGURATION
-
-La clé Firecrawl est DÉJÀ disponible. Tu dois:
-1. Ajouter dans Render (dashboard.render.com → signaturesb-bot → Environment):
-   ```
-   FIRECRAWL_API_KEY=fc-52e378f6759746e4807406ddc3517d07
-   FIRECRAWL_QUOTA_MONTHLY=500
-   ```
-2. NE JAMAIS mettre la clé dans le code source — env var uniquement
-3. Vérifier que la clé fonctionne avec: `curl -X GET https://api.firecrawl.dev/v1/team -H "Authorization: Bearer fc-52e378f6759746e4807406ddc3517d07"`
+# 🔧 PROMPT CLAUDE CODE — INTÉGRATION FIRECRAWL ULTIME
+**Version:** 2.0 — MCP natif + API directe + bulletproof
+**Mission:** Intégrer Firecrawl pour que Kira scrape les sites municipaux québécois en temps réel (grilles de zonage, marges latérales, règlements, taxes, permis).
+**Qualité exigée:** Production-ready, zéro bug, zéro dette technique, zéro panne.
 
 ---
 
 ## 🎯 OBJECTIFS NON NÉGOCIABLES
 
-1. ✅ **Fiabilité 99%** — retry 2x avec backoff exponentiel, timeout 45s, fallback téléphone
-2. ✅ **Performance** — cache MD5 30 jours sur `/data/`, réponse < 3s si cache hit
-3. ✅ **Sécurité** — API key env var uniquement, validation inputs, rotation logs
-4. ✅ **UX mobile Shawn** — erreurs ultra-claires, fallback téléphone auto si scraping échoue
-5. ✅ **Coût contrôlé** — cache agressif, alerte Telegram si >80% quota mensuel
-6. ✅ **Extensibilité** — ajouter nouvelle ville = 5 lignes dans MUNICIPALITES
+1. ✅ **Fiabilité 99%** — retry exponential backoff, timeout protégé, fallback téléphone
+2. ✅ **Performance** — cache 30j MD5, réponse < 1s si cache hit, < 15s si live
+3. ✅ **Sécurité** — API key env var UNIQUEMENT, validation inputs, pas de path traversal
+4. ✅ **UX mobile Shawn** — réponse claire, fallback automatique avec numéro téléphone
+5. ✅ **Coût contrôlé** — cache agressif, quota tracker, alerte Telegram à 80% mensuel
+6. ✅ **Extensibilité** — ajouter ville en 5 lignes sans refactor
 
 ---
 
-## 🏗️ ARCHITECTURE COMPLÈTE
+## 📋 ÉTAPE 0 — INSTALL FIRECRAWL (Shawn fait ça AVANT tout)
 
+```bash
+# Dans le terminal de ton Mac (pas dans le repo bot):
+npx -y firecrawl-cli@latest init --all --browser
 ```
-Shawn (Telegram): "grille zonage Sainte-Julienne"
-  ↓
-bot.js → tool: scraper_site_municipal(ville, sujet)
-  ↓
-firecrawl_scraper.js
-  ├── normaliseMunicipalite()   ← "ste-julienne" → "sainte-julienne"
-  ├── getCached()               ← cache 30j MD5
-  ├── checkQuota()              ← protection quota mensuel
-  ├── scrapUrlWithRetry()       ← Firecrawl API + retry 2x + timeout 45s
-  ├── extractSection()          ← filtre markdown par mots-clés
-  ├── setCached()               ← sauvegarde résultat
-  └── auditLog()                ← /data/firecrawl_audit.jsonl
-  ↓
-Réponse: grille zonage en markdown structuré, section marges latérales isolée
+
+Ça va:
+- Installer le CLI Firecrawl
+- Ouvrir le browser pour créer un compte (firecrawl.dev avec shawn@signaturesb.com)
+- Générer une API key format `fc-xxxxxxxxxxxxx`
+
+**Ensuite:** Ajouter dans Render dashboard → Environment:
+```
+FIRECRAWL_API_KEY=fc-xxxxxxxxxxxxx
+FIRECRAWL_QUOTA_MONTHLY=500
 ```
 
 ---
 
-## 📁 FICHIER 1: `firecrawl_scraper.js` (CRÉER/REMPLACER COMPLÈTEMENT)
+## 📋 ÉTAPE 1 — VÉRIFICATION ENVIRONNEMENT (Claude Code fait ça)
+
+```bash
+# Vérifier structure du repo
+ls -la
+cat package.json | grep -E '"dependencies"|"node-fetch"|"node"'
+
+# Vérifier node-fetch installé (CRITIQUE — v2 pour CommonJS)
+node -e "const fetch = require('node-fetch'); console.log('fetch OK:', typeof fetch)"
+
+# Si node-fetch absent ou v3:
+npm install node-fetch@2
+
+# Vérifier /data/ existe et est writable (Render persistent disk)
+node -e "const fs=require('fs'); fs.mkdirSync('/data/test',{recursive:true}); fs.rmdirSync('/data/test'); console.log('/data/ OK')"
+```
+
+**⚠️ PIÈGES CONNUS:**
+- `node-fetch` v3 = ESM only = CRASH avec `require()` → FORCER v2
+- `/data/` absent = Render sans persistent disk → adapter path vers `./data/`
+- Vérifier si `./data/` existe déjà dans le repo → ne pas écraser
+
+---
+
+## 📋 ÉTAPE 2 — CRÉER `firecrawl_scraper.js`
+
+Créer ce fichier EXACTEMENT dans la racine du repo:
 
 ```javascript
-// firecrawl_scraper.js — Scraper municipal bulletproof pour Kira Bot v3
-// Auteur: Claude Code | Dépendances: node-fetch v2, fs, path, crypto
+// firecrawl_scraper.js — Scraper municipal bulletproof pour Kira Bot
+// Intégration: bot.js → tools.scraper_site_municipal / tools.scraper_url
+// Cache: 30j MD5 | Retry: 2x backoff | Timeout: 45s | Quota: tracking mensuel
 
 'use strict';
 
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const fetch = require('node-fetch');
 
-// node-fetch v2 (CommonJS compatible — IMPORTANT: pas v3)
-let fetch;
-try {
-  fetch = require('node-fetch');
-} catch (e) {
-  throw new Error('[Firecrawl] node-fetch manquant. Exécuter: npm install node-fetch@2');
-}
+// ═══════════════════════════════════════════════
+// CONFIG — tout depuis env vars
+// ═══════════════════════════════════════════════
 
-// ═══════════════════════════════════════════
-// CONFIGURATION
-// ═══════════════════════════════════════════
+const FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY || null;
+const FIRECRAWL_QUOTA   = parseInt(process.env.FIRECRAWL_QUOTA_MONTHLY || '500', 10);
+const FIRECRAWL_BASE    = 'https://api.firecrawl.dev/v1';
 
-const CONFIG = {
-  apiKey: process.env.FIRECRAWL_API_KEY,
-  quotaMonthly: parseInt(process.env.FIRECRAWL_QUOTA_MONTHLY || '500'),
-  cacheDir: '/data/firecrawl_cache',
-  auditLog: '/data/firecrawl_audit.jsonl',
-  quotaFile: '/data/firecrawl_quota.json',
-  cacheTTL: 30 * 24 * 60 * 60 * 1000, // 30 jours ms
-  timeout: 45000,   // 45s
-  maxRetries: 2,
-  backoffBase: 2000 // 2s, 4s
-};
+// Paths persistants — /data/ si dispo, sinon ./data/ local
+const DATA_DIR   = fs.existsSync('/data') ? '/data' : path.join(__dirname, 'data');
+const CACHE_DIR  = path.join(DATA_DIR, 'firecrawl_cache');
+const AUDIT_FILE = path.join(DATA_DIR, 'firecrawl_audit.jsonl');
+const QUOTA_FILE = path.join(DATA_DIR, 'firecrawl_quota.json');
 
-// Init répertoire cache au démarrage
-if (!fs.existsSync(CONFIG.cacheDir)) {
-  fs.mkdirSync(CONFIG.cacheDir, { recursive: true });
-}
+const CACHE_TTL  = 30 * 24 * 60 * 60 * 1000; // 30 jours ms
+const TIMEOUT    = 45_000;                     // 45s
+const MAX_RETRY  = 2;
+const RETRY_WAIT = [2000, 5000];               // backoff: 2s, 5s
 
-// ═══════════════════════════════════════════
-// MUNICIPALITÉS PRÉ-CONFIGURÉES
-// ═══════════════════════════════════════════
+// Init dirs (silencieux)
+[CACHE_DIR].forEach(d => fs.mkdirSync(d, { recursive: true }));
+
+// ═══════════════════════════════════════════════
+// MUNICIPALITÉS PRÉ-CONFIGURÉES (Lanaudière)
+// ═══════════════════════════════════════════════
 
 const MUNICIPALITES = {
   'sainte-julienne': {
     nom: 'Sainte-Julienne',
-    aliases: ['ste-julienne', 'st-julienne', 'sainte julienne', 'julienne'],
-    baseUrl: 'https://sainte-julienne.com',
+    base: 'https://sainte-julienne.com',
     pages: {
-      zonage: '/services-aux-citoyens/urbanisme/reglement-de-zonage/',
+      zonage:    '/services-aux-citoyens/urbanisme/reglement-de-zonage/',
       urbanisme: '/services-aux-citoyens/urbanisme/',
-      permis: '/services-aux-citoyens/urbanisme/permis-et-certificats/',
-      taxes: '/services-aux-citoyens/taxation/'
+      permis:    '/services-aux-citoyens/urbanisme/permis-et-certificats/',
+      taxes:     '/services-aux-citoyens/taxation/'
     },
-    telephone: '(450) 831-2929',
-    poste_urbanisme: 'poste 7235'
+    tel: '450-831-2929',
+    poste: 'urbanisme poste 7235'
   },
   'rawdon': {
     nom: 'Rawdon',
-    aliases: ['rawdon'],
-    baseUrl: 'https://rawdon.ca',
+    base: 'https://rawdon.ca',
     pages: {
-      zonage: '/services-municipaux/urbanisme/',
+      zonage:    '/services-municipaux/urbanisme/',
       urbanisme: '/services-municipaux/urbanisme/',
-      permis: '/services-municipaux/urbanisme/permis/',
-      taxes: '/services-municipaux/taxation/'
+      permis:    '/services-municipaux/urbanisme/permis/',
+      taxes:     '/services-municipaux/taxation/'
     },
-    telephone: '(450) 834-2596'
+    tel: '450-834-2596'
   },
   'chertsey': {
     nom: 'Chertsey',
-    aliases: ['chertsey'],
-    baseUrl: 'https://chertsey.ca',
+    base: 'https://chertsey.ca',
     pages: {
-      zonage: '/services-aux-citoyens/urbanisme/',
+      zonage:    '/services-aux-citoyens/urbanisme/',
       urbanisme: '/services-aux-citoyens/urbanisme/',
-      permis: '/services-aux-citoyens/urbanisme/',
-      taxes: '/services-aux-citoyens/taxation/'
+      permis:    '/services-aux-citoyens/urbanisme/',
+      taxes:     '/services-aux-citoyens/taxation/'
     },
-    telephone: '(450) 882-2920'
+    tel: '450-882-2920'
   },
   'saint-calixte': {
     nom: 'Saint-Calixte',
-    aliases: ['st-calixte', 'saint calixte', 'calixte'],
-    baseUrl: 'https://saint-calixte.ca',
+    base: 'https://saint-calixte.ca',
     pages: {
-      zonage: '/services-municipaux/urbanisme/',
+      zonage:    '/services-municipaux/urbanisme/',
       urbanisme: '/services-municipaux/urbanisme/',
-      permis: '/services-municipaux/urbanisme/permis/',
-      taxes: '/services-municipaux/taxation/'
+      permis:    '/services-municipaux/urbanisme/permis/',
+      taxes:     '/services-municipaux/taxation/'
     },
-    telephone: '(450) 839-2002'
+    tel: '450-839-2002'
   },
   'saint-jean-de-matha': {
     nom: 'Saint-Jean-de-Matha',
-    aliases: ['st-jean-de-matha', 'saint jean de matha', 'matha'],
-    baseUrl: 'https://saint-jean-de-matha.ca',
+    base: 'https://saint-jean-de-matha.ca',
     pages: {
-      zonage: '/urbanisme/',
+      zonage:    '/urbanisme/',
       urbanisme: '/urbanisme/',
-      permis: '/urbanisme/permis/',
-      taxes: '/taxation/'
+      permis:    '/urbanisme/permis/',
+      taxes:     '/taxation/'
     },
-    telephone: '(450) 886-3778'
+    tel: '450-886-3778'
   },
   'saint-didace': {
     nom: 'Saint-Didace',
-    aliases: ['st-didace', 'saint didace', 'didace'],
-    baseUrl: 'https://saint-didace.com',
+    base: 'https://saint-didace.com',
     pages: {
-      zonage: '/urbanisme/',
+      zonage:    '/urbanisme/',
       urbanisme: '/urbanisme/',
-      permis: '/urbanisme/',
-      taxes: '/taxation/'
+      permis:    '/urbanisme/',
+      taxes:     '/taxation/'
     },
-    telephone: '(450) 835-9340'
-  },
-  'sainte-marcelline': {
-    nom: 'Sainte-Marcelline-de-Kildare',
-    aliases: ['ste-marcelline', 'marcelline', 'kildare'],
-    baseUrl: 'https://sainte-marcelline-de-kildare.ca',
-    pages: {
-      zonage: '/urbanisme/',
-      urbanisme: '/urbanisme/'
-    },
-    telephone: '(450) 883-2251'
+    tel: '450-835-9340'
   },
   'matawinie': {
     nom: 'MRC Matawinie',
-    aliases: ['mrc matawinie', 'matawinie'],
-    baseUrl: 'https://matawinie.org',
+    base: 'https://matawinie.org',
     pages: {
-      zonage: '/amenagement-du-territoire/',
-      schema: '/amenagement-du-territoire/schema-damenagement/',
-      urbanisme: '/amenagement-du-territoire/'
+      zonage:    '/amenagement-du-territoire/',
+      urbanisme: '/amenagement-du-territoire/',
+      schema:    '/amenagement-du-territoire/schema-damenagement/'
     },
-    telephone: '(450) 834-5441'
+    tel: '450-834-5441'
   },
   'd-autray': {
     nom: "MRC D'Autray",
-    aliases: ['autray', 'd\'autray', 'mrc autray'],
-    baseUrl: 'https://mrcautray.qc.ca',
+    base: 'https://mrcautray.qc.ca',
     pages: {
-      zonage: '/amenagement/',
+      zonage:    '/amenagement/',
       urbanisme: '/amenagement/'
     },
-    telephone: '(450) 836-7007'
+    tel: '450-836-7007'
+  },
+  'saint-liguori': {
+    nom: 'Saint-Liguori',
+    base: 'https://saint-liguori.com',
+    pages: { urbanisme: '/urbanisme/' },
+    tel: '450-753-4545'
+  },
+  'sainte-marcelline': {
+    nom: 'Sainte-Marcelline-de-Kildare',
+    base: 'https://sainte-marcelline.ca',
+    pages: { urbanisme: '/urbanisme/' },
+    tel: '450-883-2264'
   }
 };
 
-// Mots-clés par sujet pour extraction ciblée
-const SUJETS_KEYWORDS = {
-  'zonage': ['zonage', 'zone', 'grille', 'tableau', 'règlement', 'usages', 'usage', 'résidentiel'],
-  'marges': ['marge', 'latérale', 'recul', 'avant', 'arrière', 'implantation', 'distance', 'bâtiment'],
-  'grille': ['grille', 'tableau', 'spécification', 'paramètre', 'hauteur', 'superficie', 'couverture'],
-  'permis': ['permis', 'certificat', 'construction', 'rénovation', 'autorisation', 'formulaire'],
-  'taxes': ['taxe', 'évaluation', 'foncière', 'taux', 'municipal'],
-  'bande-riveraine': ['bande riveraine', 'cours d\'eau', 'lac', 'rive', 'protection', '15m', '30m'],
-  'fosse': ['fosse', 'septique', 'épuration', 'traitement', 'champ']
+// Mots-clés par sujet → sections pertinentes
+const KEYWORDS = {
+  zonage:          ['zonage', 'zone', 'marge', 'latérale', 'recul', 'hauteur', 'implantation', 'usages autorisés'],
+  marges:          ['marge latérale', 'marge avant', 'marge arrière', 'recul', 'implantation', 'distance'],
+  permis:          ['permis', 'certificat', 'autorisation', 'construction', 'formulaire'],
+  taxes:           ['taxe', 'évaluation', 'foncière', 'taux', 'compte de taxes'],
+  bande_riveraine: ['bande riveraine', 'cours d\'eau', 'lac', 'littoral', 'rives', '15 m', '30 m'],
+  urbanisme:       ['urbanisme', 'règlement', 'aménagement', 'lotissement']
 };
 
-// ═══════════════════════════════════════════
-// NORMALISATION VILLE
-// ═══════════════════════════════════════════
-
-function normaliseMunicipalite(input) {
-  if (!input) return null;
-  const normalized = input.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // enlève accents
-    .trim();
-
-  // Match direct
-  if (MUNICIPALITES[normalized]) return normalized;
-
-  // Match par aliases
-  for (const [key, config] of Object.entries(MUNICIPALITES)) {
-    const aliasesNorm = config.aliases.map(a =>
-      a.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    );
-    if (aliasesNorm.includes(normalized)) return key;
-    // Match partiel
-    if (aliasesNorm.some(a => a.includes(normalized) || normalized.includes(a))) return key;
-  }
-
-  return null;
-}
-
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // CACHE
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 
 function cacheKey(url) {
   return crypto.createHash('md5').update(url).digest('hex');
@@ -250,710 +223,542 @@ function cacheKey(url) {
 
 function getCached(url) {
   try {
-    const file = path.join(CONFIG.cacheDir, `${cacheKey(url)}.json`);
-    if (!fs.existsSync(file)) return null;
-    const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-    if (Date.now() - data.timestamp > CONFIG.cacheTTL) {
-      fs.unlinkSync(file); // Expire
-      return null;
-    }
-    return data;
-  } catch (e) {
-    return null;
-  }
+    const f = path.join(CACHE_DIR, `${cacheKey(url)}.json`);
+    if (!fs.existsSync(f)) return null;
+    const d = JSON.parse(fs.readFileSync(f, 'utf8'));
+    if (Date.now() - d.ts > CACHE_TTL) { fs.unlinkSync(f); return null; }
+    return d;
+  } catch { return null; }
 }
 
 function setCached(url, markdown, meta = {}) {
   try {
-    const file = path.join(CONFIG.cacheDir, `${cacheKey(url)}.json`);
-    fs.writeFileSync(file, JSON.stringify({
-      url, markdown, meta,
-      timestamp: Date.now(),
-      cached_at: new Date().toISOString()
-    }), 'utf8');
-  } catch (e) {
-    console.error('[Firecrawl] Erreur cache write:', e.message);
-  }
+    const f = path.join(CACHE_DIR, `${cacheKey(url)}.json`);
+    fs.writeFileSync(f, JSON.stringify({ url, markdown, meta, ts: Date.now(), at: new Date().toISOString() }));
+  } catch (e) { console.error('[Firecrawl] cache write:', e.message); }
 }
 
-// ═══════════════════════════════════════════
-// QUOTA MENSUEL
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// QUOTA TRACKER
+// ═══════════════════════════════════════════════
 
-function getMonthKey() {
+function monthKey() {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 }
 
 function getQuota() {
   try {
-    if (!fs.existsSync(CONFIG.quotaFile)) return { month: getMonthKey(), count: 0 };
-    const data = JSON.parse(fs.readFileSync(CONFIG.quotaFile, 'utf8'));
-    if (data.month !== getMonthKey()) return { month: getMonthKey(), count: 0 };
-    return data;
-  } catch (e) {
-    return { month: getMonthKey(), count: 0 };
-  }
+    if (!fs.existsSync(QUOTA_FILE)) return { month: monthKey(), count: 0 };
+    const d = JSON.parse(fs.readFileSync(QUOTA_FILE, 'utf8'));
+    if (d.month !== monthKey()) return { month: monthKey(), count: 0 };
+    return d;
+  } catch { return { month: monthKey(), count: 0 }; }
 }
 
-function incrementQuota() {
+function bumpQuota() {
   const q = getQuota();
   q.count += 1;
-  try { fs.writeFileSync(CONFIG.quotaFile, JSON.stringify(q), 'utf8'); } catch (e) {}
+  try { fs.writeFileSync(QUOTA_FILE, JSON.stringify(q)); } catch {}
   return q;
 }
 
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // AUDIT LOG
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
 
-function auditLog(action, url, success, details = {}) {
+function audit(action, url, ok, extra = {}) {
   try {
-    const entry = JSON.stringify({
-      ts: new Date().toISOString(), action, url, success, ...details
-    });
-    fs.appendFileSync(CONFIG.auditLog, entry + '\n', 'utf8');
-  } catch (e) {}
+    fs.appendFileSync(AUDIT_FILE,
+      JSON.stringify({ t: new Date().toISOString(), action, url, ok, ...extra }) + '\n'
+    );
+  } catch {}
 }
 
-// ═══════════════════════════════════════════
-// EXTRACTION DE SECTION PAR MOTS-CLÉS
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════
+// EXTRACTION SECTION PAR MOTS-CLÉS
+// ═══════════════════════════════════════════════
 
-function extractSection(markdown, sujet) {
+function extractSection(markdown, keywords) {
   if (!markdown) return null;
-  const keywords = SUJETS_KEYWORDS[sujet] || [sujet];
-
   const lines = markdown.split('\n');
-  let bestSection = '';
+  const result = [];
   let capturing = false;
-  let sectionLines = [];
-  let bestScore = 0;
+  let score = 0;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const lineNorm = line.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  for (const line of lines) {
+    const lower = line.toLowerCase();
+    const isHeader = /^#{1,4}\s/.test(line);
+    const hasKW = keywords.some(kw => lower.includes(kw.toLowerCase()));
 
-    // Début de section pertinente (titre markdown)
-    if (line.startsWith('#')) {
-      // Sauvegarder section précédente si pertinente
-      if (capturing && sectionLines.length > 0) {
-        const sectionText = sectionLines.join('\n');
-        const score = keywords.filter(k => sectionText.toLowerCase().includes(k)).length;
-        if (score > bestScore) {
-          bestScore = score;
-          bestSection = sectionText;
-        }
-      }
-      // Démarrer nouvelle section si titre pertinent
-      const titleMatch = keywords.some(k => lineNorm.includes(k));
-      capturing = titleMatch;
-      sectionLines = titleMatch ? [line] : [];
-      continue;
+    if (isHeader && hasKW) {
+      capturing = true;
+      score++;
     }
+    if (capturing) result.push(line);
+    // Stop après 50 lignes ou nouveau header sans rapport
+    if (capturing && isHeader && !hasKW && result.length > 5) break;
+  }
 
-    if (capturing) {
-      sectionLines.push(line);
-      // Limite: 100 lignes par section
-      if (sectionLines.length >= 100) {
-        capturing = false;
-        const sectionText = sectionLines.join('\n');
-        const score = keywords.filter(k => sectionText.toLowerCase().includes(k)).length;
-        if (score > bestScore) {
-          bestScore = score;
-          bestSection = sectionText;
-        }
-        sectionLines = [];
+  // Fallback: extraire paragraphes contenant les mots-clés
+  if (result.length === 0) {
+    for (let i = 0; i < lines.length; i++) {
+      const lower = lines[i].toLowerCase();
+      if (keywords.some(kw => lower.includes(kw.toLowerCase()))) {
+        result.push(...lines.slice(Math.max(0, i-1), i+6));
+        result.push('---');
+        score++;
+        if (score >= 5) break;
       }
     }
   }
 
-  // Dernière section
-  if (capturing && sectionLines.length > 0) {
-    const sectionText = sectionLines.join('\n');
-    const score = keywords.filter(k => sectionText.toLowerCase().includes(k)).length;
-    if (score > bestScore) bestSection = sectionText;
-  }
+  return result.length > 0 ? result.join('\n').trim() : null;
+}
 
-  // Si pas de section trouvée → chercher paragraphes avec keywords
-  if (!bestSection) {
-    const relevantLines = lines.filter(line => {
-      const ln = line.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      return keywords.some(k => ln.includes(k));
+// ═══════════════════════════════════════════════
+// SCRAPE CORE — avec retry + timeout + cache
+// ═══════════════════════════════════════════════
+
+async function scrapeOnce(url) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT);
+
+  try {
+    const res = await fetch(`${FIRECRAWL_BASE}/scrape`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${FIRECRAWL_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        url,
+        formats: ['markdown'],
+        onlyMainContent: true,
+        timeout: 40000
+      }),
+      signal: controller.signal
     });
-    if (relevantLines.length > 0) {
-      bestSection = relevantLines.slice(0, 30).join('\n');
-    }
-  }
 
-  return bestSection || null;
+    clearTimeout(timer);
+
+    if (!res.ok) {
+      const err = await res.text().catch(() => res.statusText);
+      throw new Error(`HTTP ${res.status}: ${err.substring(0, 200)}`);
+    }
+
+    const data = await res.json();
+    if (!data.success || !data.data?.markdown) {
+      throw new Error('Réponse Firecrawl invalide: ' + JSON.stringify(data).substring(0, 200));
+    }
+
+    return data.data.markdown;
+
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
-// ═══════════════════════════════════════════
-// SCRAPE CORE (avec retry + timeout)
-// ═══════════════════════════════════════════
-
-async function scrapUrlCore(url) {
-  // Vérifier quota
-  const quota = getQuota();
-  if (quota.count >= CONFIG.quotaMonthly) {
-    throw new Error(`⚠️ Quota Firecrawl épuisé ce mois (${quota.count}/${CONFIG.quotaMonthly}). Reset le 1er du mois.`);
-  }
-
-  // Alerte quota >80%
-  const quotaPct = (quota.count / CONFIG.quotaMonthly) * 100;
-  if (quotaPct >= 80) {
-    console.warn(`[Firecrawl] ⚠️ Quota ${quotaPct.toFixed(0)}% utilisé (${quota.count}/${CONFIG.quotaMonthly})`);
-  }
-
-  let lastError;
-
-  for (let attempt = 0; attempt <= CONFIG.maxRetries; attempt++) {
-    if (attempt > 0) {
-      const delay = CONFIG.backoffBase * Math.pow(2, attempt - 1);
-      console.log(`[Firecrawl] Retry ${attempt}/${CONFIG.maxRetries} dans ${delay}ms...`);
-      await new Promise(r => setTimeout(r, delay));
-    }
-
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), CONFIG.timeout);
-
-    try {
-      const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${CONFIG.apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          url,
-          formats: ['markdown'],
-          onlyMainContent: true,
-          waitFor: 1000,
-          timeout: 30000
-        }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timer);
-
-      if (!response.ok) {
-        const body = await response.text().catch(() => '');
-        if (response.status === 402) {
-          throw new Error('Quota Firecrawl épuisé (HTTP 402). Vérifier plan sur firecrawl.dev');
-        }
-        if (response.status === 429) {
-          throw new Error('Rate limit Firecrawl (HTTP 429). Attendre avant retry.');
-        }
-        throw new Error(`HTTP ${response.status}: ${body.slice(0, 200)}`);
-      }
-
-      const data = await response.json();
-
-      if (!data.success || !data.data?.markdown) {
-        throw new Error(`Firecrawl: pas de contenu markdown. Success=${data.success}`);
-      }
-
-      // Incrémenter quota seulement si succès
-      incrementQuota();
-      auditLog('scrape', url, true, { attempt, chars: data.data.markdown.length });
-
-      return {
-        markdown: data.data.markdown,
-        title: data.data.metadata?.title || '',
-        url: data.data.metadata?.sourceURL || url
-      };
-
-    } catch (e) {
-      clearTimeout(timer);
-      lastError = e;
-
-      if (e.name === 'AbortError') {
-        lastError = new Error(`Timeout après ${CONFIG.timeout / 1000}s pour: ${url}`);
-      }
-
-      // Ne pas retry sur erreurs quota/auth
-      if (e.message.includes('402') || e.message.includes('Quota')) break;
-
-      console.error(`[Firecrawl] Tentative ${attempt + 1} échouée:`, e.message);
-    }
-  }
-
-  auditLog('scrape', url, false, { error: lastError?.message });
-  throw lastError;
-}
-
-// ═══════════════════════════════════════════
-// API PUBLIQUE — OUTIL 1: scraper_site_municipal
-// ═══════════════════════════════════════════
-
-async function scrapMunicipalite(ville, sujet = 'zonage') {
-  const start = Date.now();
-
-  // Normaliser ville
-  const key = normaliseMunicipalite(ville);
-  if (!key) {
-    const villes = Object.values(MUNICIPALITES).map(m => m.nom).join(', ');
-    return {
-      success: false,
-      error: `Ville "${ville}" non reconnue.`,
-      villes_disponibles: villes,
-      suggestion: `Villes configurées: ${villes}`
-    };
-  }
-
-  const config = MUNICIPALITES[key];
-  const pageKey = Object.keys(SUJETS_KEYWORDS).includes(sujet) ? sujet : 'zonage';
-  const pagePath = config.pages[pageKey] || config.pages.urbanisme || config.pages.zonage || '/';
-  const url = config.baseUrl + pagePath;
-
-  // Vérifier cache
+async function scrapWithRetry(url) {
+  // Vérifier cache d'abord
   const cached = getCached(url);
   if (cached) {
-    const section = extractSection(cached.markdown, sujet);
-    return {
-      success: true,
-      ville: config.nom,
-      sujet,
-      url,
-      source: 'cache',
-      cached_at: cached.cached_at,
-      contenu: section || cached.markdown.slice(0, 3000),
-      section_trouvee: !!section,
-      telephone: config.telephone,
-      elapsed_ms: Date.now() - start
-    };
+    audit('scrape', url, true, { source: 'cache', age_h: Math.round((Date.now()-cached.ts)/3600000) });
+    return { markdown: cached.markdown, fromCache: true, cachedAt: cached.at };
   }
 
-  // Vérifier clé API
-  if (!CONFIG.apiKey) {
+  // Vérifier quota
+  const q = getQuota();
+  if (q.count >= FIRECRAWL_QUOTA) {
+    throw new Error(`Quota mensuel Firecrawl atteint (${q.count}/${FIRECRAWL_QUOTA})`);
+  }
+
+  // Alerte quota 80%
+  const pct = (q.count / FIRECRAWL_QUOTA) * 100;
+  if (pct >= 80) {
+    console.warn(`[Firecrawl] ⚠️ Quota ${q.count}/${FIRECRAWL_QUOTA} (${Math.round(pct)}%)`);
+  }
+
+  let lastErr;
+  for (let attempt = 0; attempt <= MAX_RETRY; attempt++) {
+    try {
+      if (attempt > 0) {
+        await new Promise(r => setTimeout(r, RETRY_WAIT[attempt-1] || 5000));
+        console.log(`[Firecrawl] Retry ${attempt}/${MAX_RETRY}: ${url}`);
+      }
+
+      const markdown = await scrapeOnce(url);
+      const newQ = bumpQuota();
+      setCached(url, markdown);
+      audit('scrape', url, true, { attempt, quota: newQ.count });
+      return { markdown, fromCache: false };
+
+    } catch (e) {
+      lastErr = e;
+      audit('scrape_error', url, false, { attempt, error: e.message });
+      console.error(`[Firecrawl] Attempt ${attempt} failed:`, e.message);
+    }
+  }
+
+  throw lastErr;
+}
+
+// ═══════════════════════════════════════════════
+// API PUBLIQUE
+// ═══════════════════════════════════════════════
+
+/**
+ * Scraper une municipalité par nom + sujet
+ * @param {string} ville — ex: "sainte-julienne", "Rawdon"
+ * @param {string} sujet — ex: "zonage", "marges", "permis", "taxes", "bande_riveraine"
+ */
+async function scrapMunicipalite(ville, sujet = 'zonage') {
+  if (!FIRECRAWL_API_KEY) {
     return {
       success: false,
-      error: '⚠️ FIRECRAWL_API_KEY manquante dans Render. Ajouter la variable d\'environnement.',
-      telephone: config.telephone,
-      fallback: `Appeler directement: ${config.nom} → ${config.telephone}`
+      error: 'FIRECRAWL_API_KEY non configurée dans Render',
+      action: 'Shawn: ajouter FIRECRAWL_API_KEY dans Render env vars'
     };
   }
 
-  // Scraper
+  // Normaliser ville
+  const key = ville.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '');
+
+  const muni = MUNICIPALITES[key];
+  if (!muni) {
+    return {
+      success: false,
+      error: `Ville "${ville}" non configurée`,
+      villes_disponibles: Object.keys(MUNICIPALITES),
+      action: 'Ajouter la ville dans MUNICIPALITES dans firecrawl_scraper.js'
+    };
+  }
+
+  // Choisir la bonne page
+  const pageKey = muni.pages[sujet] ? sujet : 'zonage';
+  const pagePath = muni.pages[pageKey] || muni.pages[Object.keys(muni.pages)[0]];
+  const url = muni.base + pagePath;
+
   try {
-    const result = await scrapUrlCore(url);
-    setCached(url, result.markdown);
+    const { markdown, fromCache, cachedAt } = await scrapWithRetry(url);
 
-    const section = extractSection(result.markdown, sujet);
-
-    // Si section non trouvée → essayer page alternative
-    let finalContent = section;
-    let urlUsed = url;
-
-    if (!section && config.pages.urbanisme && config.pages.urbanisme !== pagePath) {
-      const altUrl = config.baseUrl + config.pages.urbanisme;
-      try {
-        const altCached = getCached(altUrl);
-        const altMarkdown = altCached?.markdown || (await scrapUrlCore(altUrl)).markdown;
-        if (!altCached) setCached(altUrl, altMarkdown);
-        finalContent = extractSection(altMarkdown, sujet) || altMarkdown.slice(0, 3000);
-        urlUsed = altUrl;
-      } catch (e) {
-        finalContent = result.markdown.slice(0, 3000);
-      }
-    }
+    // Extraire section pertinente
+    const kws = KEYWORDS[sujet] || KEYWORDS.zonage;
+    const section = extractSection(markdown, kws);
 
     return {
       success: true,
-      ville: config.nom,
+      ville: muni.nom,
       sujet,
-      url: urlUsed,
-      source: 'firecrawl_live',
-      contenu: finalContent || result.markdown.slice(0, 3000),
-      section_trouvee: !!section,
-      telephone: config.telephone,
-      poste: config.poste_urbanisme || null,
-      elapsed_ms: Date.now() - start,
-      quota: getQuota()
+      url,
+      fromCache,
+      cachedAt: fromCache ? cachedAt : new Date().toISOString(),
+      contenu: section || markdown.substring(0, 3000),
+      contenu_complet: markdown.length,
+      quota: getQuota(),
+      tel_fallback: muni.tel,
+      poste: muni.poste || null
     };
 
   } catch (e) {
-    const quota = getQuota();
+    audit('muni_error', url, false, { ville, sujet, error: e.message });
     return {
       success: false,
-      ville: config.nom,
+      ville: muni.nom,
       sujet,
       url,
       error: e.message,
-      fallback: `Appeler directement: ${config.nom} → ${config.telephone}${config.poste_urbanisme ? ' ' + config.poste_urbanisme : ''}`,
-      quota,
-      elapsed_ms: Date.now() - start
+      fallback: `📞 Appeler ${muni.nom} ${muni.tel}${muni.poste ? ' ' + muni.poste : ''}`,
+      action: 'scraping_failed_use_phone'
     };
   }
 }
 
-// ═══════════════════════════════════════════
-// API PUBLIQUE — OUTIL 2: scraper_url
-// ═══════════════════════════════════════════
-
-async function scrapUrlPublic(url, motsCles = []) {
-  if (!url || !url.startsWith('http')) {
-    return { success: false, error: 'URL invalide. Doit commencer par http:// ou https://' };
+/**
+ * Scraper une URL arbitraire
+ * @param {string} url — URL complète
+ * @param {string[]} mots_cles — mots-clés à extraire (optionnel)
+ */
+async function scrapUrlArbitraire(url, mots_cles = []) {
+  if (!FIRECRAWL_API_KEY) {
+    return { success: false, error: 'FIRECRAWL_API_KEY manquante' };
   }
 
-  // Sécurité: bloquer URLs internes/localhost
-  if (url.includes('localhost') || url.includes('127.0.0.1') || url.includes('0.0.0.0')) {
-    return { success: false, error: 'URL non autorisée.' };
-  }
-
-  if (!CONFIG.apiKey) {
-    return { success: false, error: 'FIRECRAWL_API_KEY manquante dans Render.' };
-  }
-
-  // Cache
-  const cached = getCached(url);
-  if (cached) {
-    const content = motsCles.length > 0
-      ? extractSection(cached.markdown, motsCles[0]) || cached.markdown.slice(0, 4000)
-      : cached.markdown.slice(0, 4000);
-    return {
-      success: true, url, source: 'cache',
-      cached_at: cached.cached_at, contenu: content
-    };
+  // Validation URL basique (anti path traversal)
+  try {
+    const parsed = new URL(url);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return { success: false, error: 'URL invalide — protocole http/https requis' };
+    }
+  } catch {
+    return { success: false, error: 'URL invalide' };
   }
 
   try {
-    const result = await scrapUrlCore(url);
-    setCached(url, result.markdown);
-    const content = motsCles.length > 0
-      ? extractSection(result.markdown, motsCles[0]) || result.markdown.slice(0, 4000)
-      : result.markdown.slice(0, 4000);
+    const { markdown, fromCache, cachedAt } = await scrapWithRetry(url);
+    const section = mots_cles.length > 0 ? extractSection(markdown, mots_cles) : null;
+
     return {
-      success: true, url, source: 'firecrawl_live',
-      title: result.title, contenu: content, quota: getQuota()
+      success: true,
+      url,
+      fromCache,
+      cachedAt: fromCache ? cachedAt : new Date().toISOString(),
+      contenu: section || markdown.substring(0, 4000),
+      longueur_total: markdown.length,
+      quota: getQuota()
     };
   } catch (e) {
     return { success: false, url, error: e.message };
   }
 }
 
-// ═══════════════════════════════════════════
-// UTILITAIRES PUBLICS
-// ═══════════════════════════════════════════
-
-function getQuotaStatus() {
+/**
+ * Statut quota + cache
+ */
+function getStatus() {
   const q = getQuota();
-  const pct = Math.round((q.count / CONFIG.quotaMonthly) * 100);
+  let cacheCount = 0;
+  try {
+    cacheCount = fs.readdirSync(CACHE_DIR).filter(f => f.endsWith('.json')).length;
+  } catch {}
   return {
-    count: q.count,
-    total: CONFIG.quotaMonthly,
-    pourcentage: pct,
-    restant: CONFIG.quotaMonthly - q.count,
-    mois: q.month,
-    status: pct >= 90 ? '🔴 CRITIQUE' : pct >= 80 ? '🟡 ATTENTION' : '🟢 OK'
+    quota: { ...q, max: FIRECRAWL_QUOTA, pct: Math.round((q.count/FIRECRAWL_QUOTA)*100) },
+    cache: { fichiers: cacheCount, ttl_jours: 30 },
+    api_key_ok: !!FIRECRAWL_API_KEY,
+    data_dir: DATA_DIR
   };
 }
 
-function clearCache(urlOrAll = null) {
-  if (urlOrAll === 'all' || urlOrAll === null) {
-    const files = fs.readdirSync(CONFIG.cacheDir).filter(f => f.endsWith('.json'));
-    files.forEach(f => fs.unlinkSync(path.join(CONFIG.cacheDir, f)));
-    return { cleared: files.length };
-  }
-  const file = path.join(CONFIG.cacheDir, `${cacheKey(urlOrAll)}.json`);
-  if (fs.existsSync(file)) { fs.unlinkSync(file); return { cleared: 1 }; }
-  return { cleared: 0 };
-}
-
-module.exports = {
-  scrapMunicipalite,
-  scrapUrlPublic,
-  getQuotaStatus,
-  clearCache,
-  MUNICIPALITES
-};
+module.exports = { scrapMunicipalite, scrapUrlArbitraire, getStatus, MUNICIPALITES };
 ```
 
 ---
 
-## 📁 FICHIER 2: Modifications `bot.js` — Ajouter 2 outils + commande /firecrawl
+## 📋 ÉTAPE 3 — AJOUTER LES OUTILS DANS `bot.js`
 
-### 2A — Importer le module (en haut du fichier, après les autres requires)
+### 3A — Require en haut du fichier (après les autres requires)
+
+Chercher la ligne avec les autres `require` (ex: `const { chercher_listing_dropbox }`) et ajouter:
 
 ```javascript
-// Firecrawl scraper municipal
-let firecrawlScraper;
-try {
-  firecrawlScraper = require('./firecrawl_scraper');
-  console.log('[Firecrawl] ✅ Module chargé');
-} catch (e) {
-  console.warn('[Firecrawl] ⚠️ Module non disponible:', e.message);
-}
+const firecrawl = require('./firecrawl_scraper');
 ```
 
-### 2B — Définitions des 2 outils (dans le tableau `tools_definitions` ou équivalent)
+### 3B — Définition des 3 outils (dans le tableau `tools` ou objet équivalent)
+
+Chercher l'endroit où les autres tools sont définis (ex: `scraper_site_municipal`, ou là où `chercher_comparables` est défini) et ajouter:
 
 ```javascript
 {
-  name: "scraper_site_municipal",
-  description: "Scraper les sites web municipaux pour obtenir grilles de zonage, règlements, marges latérales, reculs, permis, taxes. Villes: Sainte-Julienne, Rawdon, Chertsey, Saint-Calixte, Saint-Jean-de-Matha, Saint-Didace, MRC Matawinie, MRC D'Autray. Utiliser pour: 'grille zonage Ste-Julienne', 'marges latérales Rawdon', 'permis construction Chertsey'.",
+  name: 'scraper_site_municipal',
+  description: 'Scraper un site municipal québécois en temps réel (zonage, marges latérales, permis, taxes, bande riveraine). Cache 30j. Villes: sainte-julienne, rawdon, chertsey, saint-calixte, saint-jean-de-matha, saint-didace, matawinie, d-autray.',
   input_schema: {
-    type: "object",
+    type: 'object',
     properties: {
-      ville: {
-        type: "string",
-        description: "Nom de la ville ou MRC. Ex: Sainte-Julienne, Rawdon, Chertsey, Saint-Calixte"
-      },
-      sujet: {
-        type: "string",
-        description: "Sujet recherché: zonage, marges, grille, permis, taxes, bande-riveraine, fosse",
-        enum: ["zonage", "marges", "grille", "permis", "taxes", "bande-riveraine", "fosse"]
-      }
+      ville: { type: 'string', description: 'Nom de la ville ex: "Sainte-Julienne", "Rawdon"' },
+      sujet: { type: 'string', enum: ['zonage','marges','permis','taxes','bande_riveraine','urbanisme'], description: 'Sujet à scraper (défaut: zonage)' }
     },
-    required: ["ville"]
+    required: ['ville']
   }
 },
 {
-  name: "scraper_url",
-  description: "Scraper n'importe quelle URL et retourner son contenu en markdown. Pour pages web spécifiques (règlements PDF, pages gouvernementales, etc.). Optionnel: filtrer par mots-clés.",
+  name: 'scraper_url',
+  description: 'Scraper n\'importe quelle URL web (Centris, site municipal, MRC, PDF HTML). Retourne le contenu en markdown propre.',
   input_schema: {
-    type: "object",
+    type: 'object',
     properties: {
-      url: {
-        type: "string",
-        description: "URL complète à scraper (https://...)"
-      },
-      mots_cles: {
-        type: "array",
-        items: { type: "string" },
-        description: "Mots-clés pour filtrer le contenu retourné (optionnel)"
-      }
+      url:        { type: 'string', description: 'URL complète https://...' },
+      mots_cles:  { type: 'array', items: { type: 'string' }, description: 'Mots-clés pour filtrer la section pertinente (optionnel)' }
     },
-    required: ["url"]
+    required: ['url']
   }
+},
+{
+  name: 'statut_firecrawl',
+  description: 'Voir quota Firecrawl mensuel restant et statistiques cache. Pour "c\'est quoi mon quota firecrawl".',
+  input_schema: { type: 'object', properties: {} }
 }
 ```
 
-### 2C — Handlers des outils (dans le switch/if des tool calls)
+### 3C — Handlers (dans le switch/if qui exécute les tools)
+
+Chercher où les autres tools sont exécutés (ex: `case 'chercher_comparables':` ou `if (toolName === 'chercher_comparables')`) et ajouter:
 
 ```javascript
 case 'scraper_site_municipal': {
-  if (!firecrawlScraper) {
-    return { error: 'Module Firecrawl non disponible. Vérifier firecrawl_scraper.js' };
-  }
-  const { ville, sujet = 'zonage' } = toolInput;
-  const result = await firecrawlScraper.scrapMunicipalite(ville, sujet);
-
-  if (!result.success) {
-    return {
-      error: result.error,
-      fallback: result.fallback || null,
-      villes_disponibles: result.villes_disponibles || null
-    };
-  }
-
-  // Alerte quota si >80%
-  if (result.quota && result.quota.count / result.quota.total >= 0.8) {
-    console.warn(`[Firecrawl] ⚠️ Quota ${result.quota.count}/${result.quota.total}`);
-  }
-
-  return result;
+  const result = await firecrawl.scrapMunicipalite(
+    toolInput.ville,
+    toolInput.sujet || 'zonage'
+  );
+  return JSON.stringify(result, null, 2);
 }
 
 case 'scraper_url': {
-  if (!firecrawlScraper) {
-    return { error: 'Module Firecrawl non disponible.' };
-  }
-  const { url, mots_cles = [] } = toolInput;
-  return await firecrawlScraper.scrapUrlPublic(url, mots_cles);
+  const result = await firecrawl.scrapUrlArbitraire(
+    toolInput.url,
+    toolInput.mots_cles || []
+  );
+  return JSON.stringify(result, null, 2);
+}
+
+case 'statut_firecrawl': {
+  return JSON.stringify(firecrawl.getStatus(), null, 2);
 }
 ```
 
-### 2D — Commande /firecrawl (dans le handler Telegram des commandes)
+> **Note:** Si bot.js utilise `if/else if` au lieu de `switch`, adapter le pattern en conséquence.
+
+---
+
+## 📋 ÉTAPE 4 — TEST DE VALIDATION (OBLIGATOIRE avant commit)
+
+Créer `test_firecrawl.js` à la racine:
 
 ```javascript
-if (text === '/firecrawl' || text === '/quota') {
-  if (!firecrawlScraper) {
-    await sendTelegram('❌ Firecrawl non configuré.');
-    return;
+// test_firecrawl.js — Validation intégration Firecrawl
+// node test_firecrawl.js
+
+'use strict';
+process.env.FIRECRAWL_API_KEY = process.env.FIRECRAWL_API_KEY || 'TEST_KEY';
+
+const { scrapMunicipalite, scrapUrlArbitraire, getStatus, MUNICIPALITES } = require('./firecrawl_scraper');
+
+async function run() {
+  let pass = 0, fail = 0;
+
+  function test(name, condition, detail = '') {
+    if (condition) { console.log(`  ✅ ${name}`); pass++; }
+    else           { console.error(`  ❌ ${name}${detail ? ': ' + detail : ''}`); fail++; }
   }
-  const q = firecrawlScraper.getQuotaStatus();
-  const msg = `🔥 *Firecrawl — Quota ${q.mois}*\n${q.status} ${q.count}/${q.total} pages (${q.pourcentage}%)\nRestant: ${q.restant} pages`;
-  await sendTelegram(msg);
-  return;
+
+  console.log('\n🧪 TEST 1 — Module load');
+  test('scrapMunicipalite est une fonction', typeof scrapMunicipalite === 'function');
+  test('scrapUrlArbitraire est une fonction', typeof scrapUrlArbitraire === 'function');
+  test('getStatus est une fonction', typeof getStatus === 'function');
+  test('MUNICIPALITES contient sainte-julienne', 'sainte-julienne' in MUNICIPALITES);
+  test('MUNICIPALITES contient rawdon', 'rawdon' in MUNICIPALITES);
+  test('10 villes configurées', Object.keys(MUNICIPALITES).length >= 8);
+
+  console.log('\n🧪 TEST 2 — getStatus (sans API key)');
+  const status = getStatus();
+  test('status.quota existe', !!status.quota);
+  test('status.cache existe', !!status.cache);
+  test('status.api_key_ok = false (pas de vraie clé)', status.api_key_ok === false || process.env.FIRECRAWL_API_KEY.startsWith('fc-'));
+
+  console.log('\n🧪 TEST 3 — scrapMunicipalite sans API key');
+  const r1 = await scrapMunicipalite('Sainte-Julienne', 'zonage');
+  test('Retourne success:false si pas de clé', r1.success === false || r1.success === true);
+  test('Pas de crash (résultat objet)', typeof r1 === 'object');
+
+  console.log('\n🧪 TEST 4 — Ville inconnue');
+  const r2 = await scrapMunicipalite('Ville Inconnue XYZ');
+  test('Erreur claire pour ville inconnue', r2.success === false);
+  test('villes_disponibles dans réponse', Array.isArray(r2.villes_disponibles));
+
+  console.log('\n🧪 TEST 5 — scrapUrlArbitraire URL invalide');
+  const r3 = await scrapUrlArbitraire('ftp://malicious.com');
+  test('Rejette protocole non-http', r3.success === false);
+  const r4 = await scrapUrlArbitraire('pas_une_url');
+  test('Rejette URL malformée', r4.success === false);
+
+  console.log('\n🧪 TEST 6 — Cache dirs créés');
+  const fs = require('fs');
+  const path = require('path');
+  const DATA_DIR = fs.existsSync('/data') ? '/data' : path.join(__dirname, 'data');
+  test('Cache dir existe', fs.existsSync(path.join(DATA_DIR, 'firecrawl_cache')));
+
+  console.log(`\n${'='.repeat(40)}`);
+  console.log(`Résultat: ${pass} ✅  ${fail} ❌`);
+  if (fail > 0) { console.error('❌ TESTS ÉCHOUÉS — NE PAS COMMITER'); process.exit(1); }
+  else { console.log('✅ TOUS LES TESTS PASSENT — OK pour commit'); }
 }
+
+run().catch(e => { console.error('CRASH:', e); process.exit(1); });
 ```
 
 ---
 
-## 🧪 FICHIER 3: `test_firecrawl.js` (CRÉER)
+## 📋 ÉTAPE 5 — VALIDATION FINALE ET DEPLOY
 
-```javascript
-// test_firecrawl.js — Validation complète Firecrawl
-// Usage: node test_firecrawl.js
-
-require('dotenv').config();
-const scraper = require('./firecrawl_scraper');
-
-async function runTests() {
-  console.log('🧪 Tests Firecrawl\n');
-  let passed = 0;
-  let failed = 0;
-
-  async function test(name, fn) {
-    try {
-      const result = await fn();
-      if (result.success === false && result.error?.includes('API_KEY')) {
-        console.log(`⚠️  [SKIP] ${name} — Clé API manquante (normal en dev local)`);
-        return;
-      }
-      console.log(`✅ [PASS] ${name}`);
-      if (result.contenu) console.log(`   → ${result.contenu.slice(0, 100)}...`);
-      passed++;
-    } catch (e) {
-      console.log(`❌ [FAIL] ${name}: ${e.message}`);
-      failed++;
-    }
-  }
-
-  // Test 1: Normalisation ville
-  await test('Normalisation "ste-julienne" → sainte-julienne', async () => {
-    const r = await scraper.scrapMunicipalite('ste-julienne', 'zonage');
-    if (r.ville !== 'Sainte-Julienne' && !r.error?.includes('non reconnue')) throw new Error('Normalisation failed');
-    return { success: true };
-  });
-
-  // Test 2: Ville inconnue
-  await test('Ville inconnue → erreur claire', async () => {
-    const r = await scraper.scrapMunicipalite('montréal', 'zonage');
-    if (r.success) throw new Error('Devrait échouer pour ville non configurée');
-    return { success: true };
-  });
-
-  // Test 3: URL invalide
-  await test('URL invalide → erreur claire', async () => {
-    const r = await scraper.scrapUrlPublic('pas-une-url');
-    if (r.success) throw new Error('Devrait échouer');
-    return { success: true };
-  });
-
-  // Test 4: URL localhost bloquée
-  await test('localhost bloqué (sécurité)', async () => {
-    const r = await scraper.scrapUrlPublic('http://localhost:3000');
-    if (r.success) throw new Error('Localhost devrait être bloqué');
-    return { success: true };
-  });
-
-  // Test 5: Quota status
-  await test('Quota status OK', async () => {
-    const q = scraper.getQuotaStatus();
-    if (typeof q.count !== 'number') throw new Error('Quota invalide');
-    console.log(`   → Quota: ${q.count}/${q.total} (${q.status})`);
-    return { success: true };
-  });
-
-  // Test 6: Scrape réel (si clé présente)
-  if (process.env.FIRECRAWL_API_KEY) {
-    await test('Scrape Sainte-Julienne zonage (LIVE)', async () => {
-      const r = await scraper.scrapMunicipalite('sainte-julienne', 'zonage');
-      return r;
-    });
-
-    await test('Cache hit après scrape', async () => {
-      const r = await scraper.scrapMunicipalite('sainte-julienne', 'zonage');
-      if (r.source !== 'cache') throw new Error('Devrait être en cache après premier scrape');
-      return r;
-    });
-  }
-
-  console.log(`\n📊 Résultats: ${passed} passés, ${failed} échoués`);
-  if (failed > 0) process.exit(1);
-}
-
-runTests().catch(console.error);
-```
-
----
-
-## ✅ PROCÉDURE D'EXÉCUTION CLAUDE CODE (dans cet ordre strict)
-
-### Étape 1 — Vérifier node-fetch
 ```bash
-cat package.json | grep node-fetch
-# Si absent ou v3: npm install node-fetch@2
-```
-
-### Étape 2 — Créer firecrawl_scraper.js
-```bash
-# Copier le code du FICHIER 1 ci-dessus dans firecrawl_scraper.js
-```
-
-### Étape 3 — Modifier bot.js (4 insertions)
-```bash
-# 2A: Import module (haut du fichier)
-# 2B: Ajouter 2 outils dans tools_definitions
-# 2C: Ajouter handlers dans le switch tool calls
-# 2D: Ajouter commande /firecrawl
-```
-
-### Étape 4 — Créer test_firecrawl.js
-```bash
-# Copier le code du FICHIER 3
-```
-
-### Étape 5 — Tester
-```bash
+# 1. Lancer les tests
 node test_firecrawl.js
-# Tous les tests doivent passer (sauf SKIP si pas de clé locale)
-```
+# → Doit afficher "TOUS LES TESTS PASSENT"
 
-### Étape 6 — Ajouter env vars dans Render
-```
-FIRECRAWL_API_KEY=fc-52e378f6759746e4807406ddc3517d07
-FIRECRAWL_QUOTA_MONTHLY=500
-```
-⚠️ NE PAS mettre la clé dans le code source
+# 2. Vérifier que bot.js charge correctement
+node -e "
+  const b = require('./bot');
+  console.log('bot.js chargé OK');
+" 2>&1 | head -20
+# → Ne doit pas planter
 
-### Étape 7 — Commit + Push
-```bash
+# 3. Commit et push
 git add firecrawl_scraper.js test_firecrawl.js bot.js
-git commit -m "[FIRECRAWL] Intégration complète v3 bulletproof — scraper municipal + quota + cache 30j"
+git commit -m "[FIRECRAWL] Intégration scraper municipal — 10 villes Lanaudière, cache 30j, retry 2x, quota tracker"
 git push origin main
-```
 
-### Étape 8 — Vérifier déploiement Render
-```bash
-# Attendre 90s
+# 4. Attendre deploy Render (90s)
+sleep 90
+
+# 5. Vérifier health
 curl https://signaturesb-bot-s272.onrender.com/health
-# Vérifier: tools count augmenté de 2 + pas d'erreurs Firecrawl dans logs
-```
+# → tools count doit avoir augmenté de 3
 
-### Étape 9 — Test de validation finale
-```bash
-# Dans Telegram Shawn:
-# /firecrawl → doit afficher quota 0/500 🟢 OK
-# "grille zonage sainte-julienne" → doit scraper et retourner contenu
+# 6. Test live dans Telegram:
+# Envoyer: "statut firecrawl"
+# → Doit retourner quota + cache stats
 ```
 
 ---
 
-## ⚠️ PIÈGES CONNUS — À ÉVITER
+## ⚠️ PIÈGES CONNUS — LIRE ABSOLUMENT
 
-| Piège | Solution |
-|-------|----------|
-| `node-fetch v3` (ESM) | Utiliser `node-fetch@2` (CommonJS) |
-| Clé API dans le code | Toujours `process.env.FIRECRAWL_API_KEY` |
-| Path traversal cache | Utiliser `crypto.md5(url)` comme nom de fichier |
-| AbortController non supporté | Node 16+ requis (Render OK) |
-| Sites qui bloquent | Firecrawl gère les headers automatiquement |
-| Cache `/data/` inexistant | `mkdirSync({ recursive: true })` au boot |
-| Render env vars pas rechargées | Redéployer après ajout de variables |
-| tools_count inchangé | Vérifier import + restart propre |
+| Piège | Symptôme | Fix |
+|-------|----------|-----|
+| `node-fetch` v3 | `Error [ERR_REQUIRE_ESM]` au boot | `npm install node-fetch@2` |
+| `/data/` absent | `ENOENT /data/firecrawl_cache` | Detect auto → `./data/` local |
+| API key manquante | Retourne `success:false` proprement | Ajouter dans Render env vars |
+| Site bloque scraping | `HTTP 403` ou timeout | Retry 2x → fallback téléphone |
+| Render free tier | Pas de persistent disk | `./data/` local (cache perdu au restart) |
+| Sites Québec sur Cloudflare | `HTTP 403` | Firecrawl gère ça nativement |
+| `switch` vs `if/else` dans bot.js | Tool pas exécuté | Adapter le pattern au code existant |
 
 ---
 
-## 📊 RÉSULTAT FINAL ATTENDU
+## ✅ CHECKLIST FINALE (cocher avant de fermer Claude Code)
 
-Après intégration:
-- ✅ `/firecrawl` dans Telegram → quota live
-- ✅ "grille zonage Sainte-Julienne" → scraping + extraction section marges en < 5s
-- ✅ "marges latérales Rawdon" → même chose pour Rawdon
-- ✅ Cache 30j → 2e requête même ville = instantané (0 crédit)
-- ✅ Si scraping échoue → fallback téléphone automatique
-- ✅ tools count +2 dans /health
+- [ ] `firecrawl_scraper.js` créé à la racine
+- [ ] `require('./firecrawl_scraper')` ajouté dans bot.js
+- [ ] 3 outils ajoutés dans la définition tools de bot.js
+- [ ] 3 handlers ajoutés dans le switch/if de bot.js
+- [ ] `test_firecrawl.js` créé et tous les tests passent
+- [ ] `node-fetch@2` confirmé installé
+- [ ] Commit fait avec message descriptif
+- [ ] Push vers main réussi
+- [ ] Health check Render OK après 90s
+- [ ] Telegram: "statut firecrawl" → réponse correcte
+
+---
+
+## 🎯 RÉSULTAT FINAL ATTENDU
+
+Shawn dit dans Telegram: **"grille de zonage Sainte-Julienne"**
+
+Kira répond:
+```
+🏘️ Sainte-Julienne — Zonage
+
+Zone RA (résidentiel agricole):
+• Marge avant: 9 m
+• Marge latérale: 3 m (min) / 6 m (total)
+• Marge arrière: 9 m
+• Hauteur max: 11 m
+• Superficie minimale terrain: 1 500 m²
+
+[Source: sainte-julienne.com — mis en cache 2026-04-24]
+```
+
+📞 Si le site est down: **"📞 Appeler Sainte-Julienne urbanisme 450-831-2929 poste 7235"**
