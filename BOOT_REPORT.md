@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-04-25 15 h 22 min 01 s_
+_2026-04-25 15 h 28 min 42 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 42
-- Uptime: 18s
+- Uptime: 17s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -41,5 +41,6 @@ OK|GIST|Poller state restauré: 114 processed, 49 leads
 OK|GIST|Dedup restauré: 46 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
-OK|BOOT|✅ Self-test Telegram: notif reçue par Shawn
+OK|BOOT|✅ Pre-flight: 7/8 OK
+INFO|AUDIT|boot/preflight_issues {"failed":[{"label":"Dropbox API","detail":"HTTP 400"}]}
 ```
