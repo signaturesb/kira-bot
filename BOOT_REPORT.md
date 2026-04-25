@@ -1,5 +1,5 @@
 # ✅ Boot réussi
-_2026-04-25 19 h 16 min 18 s_
+_2026-04-25 19 h 22 min 17 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 46
@@ -20,10 +20,10 @@ INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
 OK|GIST|117 faits chargés
-OK|GIST|History restauré depuis Gist: 10 messages sur 1 chats (dernière save: 2026-04-25T21:33:40.047Z)
-INFO|BOOT|Step 5: load session live context
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
 OK|DBX_IDX|Index: 64 dossiers, 333 fichiers · 1s · 58 Centris# · 45 tokens rue
+OK|GIST|History restauré depuis Gist: 4 messages sur 1 chats (dernière save: 2026-04-25T23:20:45.230Z)
+INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (7KB)
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
 OK|BOOT|Gmail Lead Poller + auto-trash CI noise activés
@@ -41,6 +41,5 @@ OK|GIST|Poller state restauré: 118 processed, 51 leads
 OK|GIST|Dedup restauré: 53 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
-OK|BOOT|✅ Pre-flight: 7/8 OK
-INFO|AUDIT|boot/preflight_issues {"failed":[{"label":"Dropbox API","detail":"HTTP 400"}]}
+OK|BOOT|✅ Pre-flight: 8/8 OK
 ```
