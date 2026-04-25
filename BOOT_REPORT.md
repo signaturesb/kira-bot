@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-04-25 16 h 41 min 03 s_
+_2026-04-25 17 h 20 min 36 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 45
-- Uptime: 17s
+- Uptime: 18s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -20,7 +20,7 @@ INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
 OK|GIST|100 faits chargés
-OK|GIST|History restauré depuis Gist: 28 messages sur 1 chats (dernière save: 2026-04-24T18:20:07.472Z)
+OK|GIST|History restauré depuis Gist: 4 messages sur 1 chats (dernière save: 2026-04-25T20:55:21.884Z)
 INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (7KB)
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
@@ -37,8 +37,8 @@ WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
 OK|PREFLIGHT|✅ Claude API accepte les 45 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
-OK|GIST|Poller state restauré: 114 processed, 49 leads
-OK|GIST|Dedup restauré: 46 entries
+OK|GIST|Poller state restauré: 115 processed, 50 leads
+OK|GIST|Dedup restauré: 49 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
 OK|BOOT|✅ Pre-flight: 7/8 OK
