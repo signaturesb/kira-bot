@@ -1,102 +1,144 @@
-# PATCH P5 — Activité "appel" automatique le jour de réception du lead
+# PATCH P5 — Activité "appel" automatique + Scraping Centris courtier
 
-**Priorité:** HAUTE — à ajouter après P1, P2, P3, P4
-**Temps estimé:** 5 min
-**Demande Shawn (2026-04-25):** "Le deal a pas été créé en activité à faire en date de la journée de la réception de la demande"
-
----
-
-## OBJECTIF
-
-Pour CHAQUE nouveau lead entrant via Gmail Poller, après `creerDeal()`, créer automatiquement une **activité Pipedrive de type "appel"** due **le jour même** (date de réception du lead, heure +30 min).
-
-Évite la perte de leads par oubli de relance immédiate.
+## Objectif
+Après chaque nouveau lead traité:
+1. Créer activité "appel" due le jour même dans Pipedrive
+2. Scraper Centris courtier (compte 110509) pour récupérer les docs/photos du listing
+3. Envoyer confirmation Telegram à Shawn
 
 ---
 
-## CODE À AJOUTER
+## Contexte Centris
+- **Compte agent:** 110509
+- **Password:** via env var CENTRIS_PASS
+- **URL base:** https://www.centris.ca/
+- **Login URL:** https://www.centris.ca/fr/login
+- **Listing agent:** https://www.centris.ca/fr/propriete~[type]~[centris_id]
+- **But:** Récupérer fiche complète (PDF, photos, description, specs) directement via session agent
 
-### Dans `bot.js` → fonction `traiterNouveauLead()`
+---
 
-**Localiser:** juste APRÈS la création réussie du deal (`creerDeal()` ou `tools.creer_deal()`)
+## Code à ajouter dans bot.js
 
-**Ajouter ce bloc:**
+### 1. Après creerDeal() — Activité appel automatique
 
 ```javascript
-// ═══ P5: Activité appel automatique le jour même ═══
-try {
-  const maintenant = new Date();
-  const dateActivite = maintenant.toISOString().split('T')[0]; // YYYY-MM-DD
+// P5 — Activité appel auto le jour même
+async function creerActiviteAppelAuto(dealId, prospectNom) {
+  try {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const heureNow = new Date();
+    heureNow.setMinutes(heureNow.getMinutes() + 30);
+    const heure = heureNow.toTimeString().slice(0, 5); // HH:MM
 
-  // Heure actuelle + 30 min, arrondi à la prochaine heure pile
-  const heureFuture = new Date(maintenant.getTime() + 30 * 60 * 1000);
-  const heureActivite = `${String(heureFuture.getHours()).padStart(2, '0')}:00`;
+    await pipedrive.post('/activities', {
+      subject: `📞 Appel J+0 — ${prospectNom}`,
+      type: 'call',
+      due_date: today,
+      due_time: heure,
+      deal_id: dealId,
+      note: 'Appel suite à réception du lead — créé automatiquement par Kira'
+    });
 
-  await pipedriveRequest('POST', '/activities', {
-    subject: `📞 Appeler nouveau lead: ${prenom} ${nom || ''}`.trim(),
-    type: 'call',
-    due_date: dateActivite,
-    due_time: heureActivite,
-    duration: '00:15',
-    deal_id: dealId,
-    person_id: personId || undefined,
-    note: `Lead reçu via ${source || 'Centris'} à ${maintenant.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })}. Docs envoyés automatiquement. Premier contact prioritaire.`
-  });
-
-  console.log(`[P5] ✅ Activité appel créée pour deal ${dealId} — ${dateActivite} ${heureActivite}`);
-
-  // Confirmation Telegram à Shawn
-  await sendTelegram(
-    `📞 *Activité créée*\n` +
-    `Appel ${prenom} ${nom || ''} prévu *aujourd'hui ${heureActivite}*\n` +
-    `Deal Pipedrive: #${dealId}`
-  );
-
-} catch (errP5) {
-  console.error('[P5] Erreur création activité:', errP5.message);
-  // Non bloquant — le deal et les docs sont déjà OK
-  await sendTelegram(`⚠️ Activité auto échouée pour ${prenom} — créer manuellement`);
+    console.log(`[P5] Activité appel créée pour ${prospectNom} — due ${today} à ${heure}`);
+  } catch (err) {
+    console.error('[P5] Erreur création activité:', err.message);
+  }
 }
 ```
 
+### 2. Scraping Centris courtier (session authentifiée)
+
+```javascript
+// P5 — Scraper Centris avec compte agent 110509
+const { chromium } = require('playwright'); // ou puppeteer si déjà installé
+
+async function scrapeListingCentris(centrisId) {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+
+  try {
+    // Login Centris
+    await page.goto('https://www.centris.ca/fr/login');
+    await page.fill('#username', process.env.CENTRIS_USER || '110509');
+    await page.fill('#password', process.env.CENTRIS_PASS);
+    await page.click('[type=submit]');
+    await page.waitForNavigation();
+
+    // Aller sur la fiche
+    await page.goto(`https://www.centris.ca/fr/propriete~terrain~${centrisId}`);
+    await page.waitForLoadState('networkidle');
+
+    // Extraire données clés
+    const data = await page.evaluate(() => ({
+      titre: document.querySelector('h1')?.innerText,
+      prix: document.querySelector('[data-price]')?.innerText,
+      adresse: document.querySelector('.address')?.innerText,
+      description: document.querySelector('.description')?.innerText,
+      photos: [...document.querySelectorAll('.photo img')].map(img => img.src),
+      specs: [...document.querySelectorAll('.specs li')].map(li => li.innerText)
+    }));
+
+    await browser.close();
+    return data;
+
+  } catch (err) {
+    await browser.close();
+    console.error('[P5] Erreur scrape Centris:', err.message);
+    return null;
+  }
+}
+```
+
+### 3. Confirmation Telegram après envoi docs
+
+```javascript
+// P5 — Confirmation Telegram systématique
+async function confirmerEnvoiDocs(prospect, email, centrisId, tempsMs) {
+  const msg = [
+    `✅ *Docs envoyés automatiquement*`,
+    `👤 *${prospect}*`,
+    `📧 ${email}`,
+    `🏡 Centris #${centrisId}`,
+    `⚡ ${tempsMs}ms après réception du lead`,
+    `📞 Activité appel créée pour aujourd'hui`
+  ].join('\n');
+
+  await sendTelegram(msg, { parse_mode: 'Markdown' });
+}
+```
+
+### 4. Intégration dans traiterNouveauLead()
+
+Ajouter APRÈS envoyerDocsAutoResilient():
+
+```javascript
+// P5 — Après envoi docs
+const tempsTotal = Date.now() - leadRecuAt;
+await creerActiviteAppelAuto(dealResult.id, `${prenom} ${nom}`);
+await confirmerEnvoiDocs(`${prenom} ${nom}`, email, centrisId, tempsTotal);
+```
+
 ---
 
-## VALIDATION
+## Variables d'environnement requises
 
-Après push:
+Déjà dans Render:
+- `CENTRIS_USER=110509`
+- `CENTRIS_PASS=***`
+
+---
+
+## Test
+
 ```bash
-node validate.js
-git add -A && git commit -m "[PATCH P5] Activité appel auto le jour même"
-git push origin main
-```
-
-**Test:** envoyer un faux lead Centris → vérifier dans Pipedrive qu'une activité "appel" existe avec date du jour.
-
----
-
-## CONFIRMATION TELEGRAM COMPLÈTE (workflow lead final)
-
-Après tous les patches, Shawn reçoit pour CHAQUE lead:
-
-```
-🆕 Nouveau lead Centris
-👤 [Prénom Nom]
-📧 [email]
-📱 [tel]
-🏡 [type propriété]
-
-✅ Deal Pipedrive créé #[id]
-✅ Docs envoyés à [email]
-✅ Activité appel prévue aujourd'hui [HH:00]
-⏱️ Traitement total: [X] secondes
+node -e "require('./bot.js'); scrapeListingCentris('28399427').then(console.log)"
 ```
 
 ---
 
-## NOTE STRATÉGIQUE
-
-Ce patch est CRITIQUE — sans activité auto, les leads peuvent être oubliés malgré la
-réception et l'envoi de docs. L'activité Pipedrive force la relance dans les 24h
-(meilleure pratique RE/MAX: contact <5 min, relance <24h).
-
-[2026-04-25 — Shawn Barrette, Signature SB]
+## Notes importantes
+- Centris peut bloquer les bots → utiliser des délais naturels (1-2s entre actions)
+- Firecrawl peut aussi scraper Centris si Playwright trop lourd
+- Priorité: Playwright si déjà installé, sinon Firecrawl API
+- Cache les fiches 24h pour éviter les requêtes répétées
