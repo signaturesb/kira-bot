@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-04-25 18 h 30 min 06 s_
+_2026-04-25 19 h 10 min 13 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 46
-- Uptime: 18s
+- Uptime: 17s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -19,7 +19,9 @@ INFO|DBX_IDX|Paths à indexer: /Inscription | /Terrain en ligne
 INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
-OK|GIST|115 faits chargés
+OK|GIST|117 faits chargés
+OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
+OK|DBX_IDX|Index: 64 dossiers, 333 fichiers · 1s · 58 Centris# · 45 tokens rue
 OK|GIST|History restauré depuis Gist: 10 messages sur 1 chats (dernière save: 2026-04-25T21:33:40.047Z)
 INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (7KB)
@@ -29,16 +31,14 @@ INFO|BOOT|Step 6: registerHandlers
 INFO|BOOT|Step 7: startDailyTasks
 OK|CRON|Tâches: visites 7h, digest 8h→Julie, sync BOT_STATUS chaque heure, monitoring 10min
 INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
-OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:115 — tools:46 — port:10000
-OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
-OK|DBX_IDX|Index: 64 dossiers, 333 fichiers · 1s · 58 Centris# · 45 tokens rue
+OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:117 — tools:46 — port:10000
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
 OK|PREFLIGHT|✅ Claude API accepte les 46 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
-OK|GIST|Poller state restauré: 115 processed, 50 leads
-OK|GIST|Dedup restauré: 49 entries
+OK|GIST|Poller state restauré: 118 processed, 51 leads
+OK|GIST|Dedup restauré: 53 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
 OK|BOOT|✅ Pre-flight: 7/8 OK
