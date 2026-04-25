@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-04-25 11 h 04 min 38 s_
+_2026-04-25 11 h 29 min 33 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 41
-- Uptime: 18s
+- Uptime: 17s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -33,7 +33,7 @@ OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:100 — tool
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
-OK|DBX_IDX|Index: 64 dossiers, 333 fichiers · 2s · 58 Centris# · 45 tokens rue
+OK|DBX_IDX|Index: 64 dossiers, 333 fichiers · 1s · 58 Centris# · 45 tokens rue
 OK|PREFLIGHT|✅ Claude API accepte les 41 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
