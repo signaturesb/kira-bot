@@ -1,191 +1,109 @@
-# SESSION LIVE — 2026-04-24 (mis à jour — PRÊT POUR CLAUDE CODE)
+# SESSION LIVE — 2026-04-25 (mis à jour — CLAUDE CODE EN COURS)
 
-## 🎯 MISSION DU JOUR — FLUX LEAD AUTO PARFAIT
+## 🎯 MISSION PRIORITAIRE — SYSTÈME DE PROTECTION COMPLET
 
-**Demande Shawn:** "Le meilleur système, le plus perfectionné, efficace, que ça fonctionne une bonne fois pour toute."
+**Demande Shawn:** "Prévenir plutôt que guérir — système de protection qui règle tout avant que ça arrive."
 
-**État lead_parser.js:** ✅ COMPLET (patch 24 avril — validation anti-faux-positifs)
-
-**État bot.js:** ⚠️ 4 patches restants → voir `LEAD_FLOW_FINAL.md`
+**Fichier à lire EN PREMIER:** `PROTECTION_SYSTEM.md` (déjà dans le repo)
 
 ---
 
-## 🔧 CE QUI RESTE À FAIRE — SESSION CLAUDE CODE
+## 🛡️ CE QUE TU DOIS IMPLÉMENTER (dans l'ordre)
 
-### Lire d'abord:
-1. `LEAD_FLOW_FINAL.md` — instructions précises avec code prêt à copier
-2. `LEÇONS.md` — pièges connus (Render, Git, Opus)
-3. `ÉTAT_SYSTÈME.md` — architecture complète
-4. `FIRECRAWL_PROMPT_CLAUDE_CODE.md` — intégration Firecrawl complète (scraping municipal)
+### ÉTAPE 1 — N1: Alerte J+1 automatique (20 min)
+- Ajouter fonction `planifierAlerteJ1()` dans `bot.js`
+- Appeler dans `traiterNouveauLead()` APRÈS création deal Pipedrive
+- Créer `pending_alerts.json` dans `/data/`
+- Tout le code est dans `PROTECTION_SYSTEM.md` → section N1
 
-### Les 4 patches dans bot.js (dans cet ordre):
+### ÉTAPE 2 — N2: Rapport matin 8h30 (15 min)
+- Ajouter `schedule.scheduleJob('30 8 * * *', ...)` dans le bloc crons existants
+- Ajouter fonction `envoyerRapportMatin()`
+- Tout le code est dans `PROTECTION_SYSTEM.md` → section N2
 
-**P3 — Bcc (2 min):**
-- Chercher: `Cc: ${SHAWN_EMAIL}` ou `cc: SHAWN_EMAIL`
-- Remplacer par: `Bcc:` dans MIME / `bcc:` dans payload Gmail API
-- Validation: envoyer email test, Shawn ne doit PAS apparaître en Cc
+### ÉTAPE 3 — N3: Cron horaire seuils stagnation (20 min)
+- Ajouter `schedule.scheduleJob('0 * * * *', ...)` dans le bloc crons
+- Ajouter fonctions `checkAlertes()` + `checkSeuils()`
+- Tout le code est dans `PROTECTION_SYSTEM.md` → section N3
 
-**P2 — Retry docs résilient (10 min):**
-- Ajouter `alertShawnDocsFailed()` + `envoyerDocsAutoResilient()` AVANT la définition de `envoyerDocsAuto()`
-- Faire find+replace: `envoyerDocsAuto(` → `envoyerDocsAutoResilient(` (sauf la définition)
-- Le code complet est dans `LEAD_FLOW_FINAL.md` → section P2
+### ÉTAPE 4 — N4: Hygiene CRM quotidienne 9h (15 min)
+- Ajouter `schedule.scheduleJob('0 9 * * *', ...)` dans le bloc crons
+- Ajouter fonction `hygieneQuotidienne()`
+- Tout le code est dans `PROTECTION_SYSTEM.md` → section N4
 
-**P1 — Validation nom avant deal (15 min):**
-- Dans `traiterNouveauLead()`, AVANT `creerDeal()` ou `tools.creer_deal()`
-- Ajouter le bloc de validation + pending + alerte Telegram
-- Le code complet est dans `LEAD_FLOW_FINAL.md` → section P1
+### ÉTAPE 5 — N5: Digest hebdo dimanche 20h (10 min)
+- Ajouter `schedule.scheduleJob('0 20 * * 0', ...)` dans le bloc crons
+- Ajouter fonction `envoyerDigestHebdo()`
+- Tout le code est dans `PROTECTION_SYSTEM.md` → section N5
 
-**P4 — /pending amélioré (10 min):**
-- Charger `pending_leads.json` au boot
-- Ajouter handler `nom [Prénom Nom]` dans les commandes
-- Le code complet est dans `LEAD_FLOW_FINAL.md` → section P4
+### ÉTAPE 6 — Patches précédents (si pas encore faits)
+Lire `LEAD_FLOW_FINAL.md` → P3 (Bcc), P2 (Retry docs), P1 (Validation nom), P4 (/pending amélioré)
 
-### Après chaque patch:
+---
+
+## ✅ APRÈS CHAQUE ÉTAPE
+
 ```bash
-node validate.js  # doit passer
-git add -A && git commit -m "[PATCH Px] Description"
+node validate.js   # doit passer sans erreur
+git add -A && git commit -m "[PROTECTION N1] Alerte J+1 automatique"
 git push origin main
-# Attendre 90s
+# Attendre 90 secondes
 curl https://signaturesb-bot-s272.onrender.com/health
-# Vérifier tools count + pas d'erreurs
+# Vérifier: tools count OK + pas d'erreurs
 ```
 
 ---
 
-## 🌐 INTÉGRATION FIRECRAWL — SCRAPING SITES MUNICIPAUX
+## 📁 FICHIERS CLÉS À LIRE EN PREMIER
 
-**Objectif:** Permettre à Kira de scraper les sites municipaux en temps réel (zonage, marges, permis, taxes)
-
-**Fichier instructions:** `FIRECRAWL_PROMPT_CLAUDE_CODE.md` dans ce repo
-
-### Étapes pour Shawn (AVANT Claude Code):
-1. Créer compte sur **firecrawl.dev** avec shawn@signaturesb.com
-2. Copier la clé API (`fc-xxxxx`)
-3. Render → ajouter variable d'environnement: `FIRECRAWL_API_KEY=fc-xxxxx`
-4. Render → ajouter: `FIRECRAWL_QUOTA_MONTHLY=500`
-
-### Ce que Claude Code va créer:
-- `firecrawl_scraper.js` — module complet avec cache, retry, quota
-- 2 nouveaux outils dans `bot.js`:
-  - `scraper_site_municipal(ville, sujet)` → retourne section exacte (ex: marges latérales)
-  - `scraper_url(url)` → scrape n'importe quelle URL directement
-
-### Fonctionnalités intégrées:
-- ✅ Cache MD5 persistant 30 jours sur `/data/firecrawl_cache/`
-- ✅ Retry 2x avec backoff exponentiel (1s → 2s)
-- ✅ Timeout 45s avec AbortController
-- ✅ Quota tracker mensuel (alerte à 80% = 400/500 pages)
-- ✅ Audit log JSONL pour debug
-- ✅ Fallback automatique: si scraping échoue → numéro téléphone municipal affiché
-- ✅ Commande `/firecrawl` → voir quota en direct
-- ✅ Extraction par mots-clés → sort direct la section "marges latérales" ou "zonage"
-
-### 8 villes pré-configurées:
-| Ville | URL Zonage | Téléphone |
-|-------|-----------|-----------|
-| Sainte-Julienne | sainte-julienne.ca/urbanisme | (450) 831-2929 |
-| Rawdon | rawdon.ca/services/urbanisme | (450) 834-2596 |
-| Chertsey | chertsey.ca/urbanisme | (450) 882-2920 |
-| Saint-Calixte | saint-calixte.ca/urbanisme | (450) 839-2002 |
-| Saint-Jean-de-Matha | saintjeandematha.ca/urbanisme | (450) 886-3826 |
-| Saint-Didace | saintdidace.ca | (450) 835-5597 |
-| MRC Matawinie | matawinie.org/amenagement | (450) 834-5441 |
-| MRC D'Autray | mrcautray.qc.ca | (450) 836-7007 |
-
-### Tests obligatoires après intégration:
-```bash
-node test_firecrawl.js  # 5 scénarios
-# 1. Cache miss → scrape réel
-# 2. Cache hit → retour immédiat
-# 3. Timeout simulation → fallback téléphone
-# 4. Quota 80% → alerte Telegram
-# 5. Extraction mots-clés → section exacte retournée
-```
-
-### Résultat attendu:
-Shawn dit: *"Grille zonage Sainte-Julienne marges latérales"*
-→ Kira retourne en 3 secondes la section exacte du règlement de zonage ✅
+1. `PROTECTION_SYSTEM.md` — ⭐ MISSION DU JOUR — code complet N1→N5
+2. `LEAD_FLOW_FINAL.md` — 4 patches bot.js (P1→P4) si pas encore faits
+3. `LEÇONS.md` — pièges connus (Render, Git, Opus)
+4. `ÉTAT_SYSTÈME.md` — architecture complète du bot
+5. `FIRECRAWL_PROMPT_CLAUDE_CODE.md` — intégration Firecrawl (après protection system)
 
 ---
 
-## ✅ DÉJÀ COMPLÉTÉ (lead_parser.js — 2026-04-24)
+## 🔧 VARIABLES D'ENVIRONNEMENT (Render — déjà configurées)
 
-- `isValidProspectName()` — rejette Shawn Barrette, remax, courtier, etc.
-- `isValidEmail()` — rejette signaturesb, remax, centris, noreply
-- `isValidPhone()` — valide 10 chiffres NA strict
-- Score qualité `_score` (0-100)
-- AI Haiku activé si score < 70
-- Merge AI amélioré (regex prioritaire, AI comble seulement)
-
----
-
-## 📊 CONTEXTE LEADS RÉCENTS
-
-| Date | Prospect | Propriété | Problème | Statut |
-|------|----------|-----------|----------|--------|
-| 23 avril ~0h15 | ❌ "Shawn Barrette" (mauvais) | 2850 Rue Stella, Rawdon #11041781 | Parser bugué | Docs jamais envoyés |
-| 23 avril ~4h43 | Erika Sciortino | Rang St-Joseph, St-Ignace-de-Loyola #26621771 | Deal x2 | Vérifier doublons |
-| 23 avril ~5h05 | Erika Sciortino | Rang St-Joseph, St-Ignace-de-Loyola #26621771 | Lead x2 | Vérifier doublons |
-
-**Lead Rue Stella — À RÉGLER MANUELLEMENT:**
-- Chercher deal "Shawn Barrette" dans Pipedrive → marquer perdu ou supprimer
-- Identifier le vrai prospect via email Centris original
-- Envoyer les 5 PDFs Dropbox manuellement (`envoie les docs à [email]`)
+- `PIPEDRIVE_API_KEY` ✅
+- `TELEGRAM_BOT_TOKEN` ✅
+- `GMAIL_CLIENT_ID` + `GMAIL_CLIENT_SECRET` + `GMAIL_REFRESH_TOKEN` ✅
+- `DROPBOX_APP_KEY` + `DROPBOX_APP_SECRET` + `DROPBOX_REFRESH_TOKEN` ✅
+- `FIRECRAWL_API_KEY=fc-52e378f6759746e4807406ddc3517d07` ← ajouter si pas encore fait
+- `FIRECRAWL_QUOTA_MONTHLY=500` ← ajouter si pas encore fait
 
 ---
 
-## 🏗️ ARCHITECTURE FLUX LEAD (cible après patches)
+## 🏗️ ARCHITECTURE BOT
 
-```
-Email Centris arrive dans Gmail
-         ↓
-Gmail Poller scan (toutes 5min)
-         ↓
-isJunkLeadEmail() → si junk: SKIP
-         ↓
-parseLeadEmail() → score qualité 0-100
-         ↓ si score < 70
-         → parseLeadEmailWithAI() (Haiku)
-         ↓
-isValidProspectName()?
-   NON → pending_leads.json + alerte Telegram "⚠️ nom non identifié"
-         Shawn répond "nom [Prénom Nom]" → deal créé
-   OUI ↓
-creerDeal(Pipedrive) — dédup par email/tel/nom
-         ↓
-matchDropboxAvance(centris/adresse) — 4 stratégies
-         ↓ si match ≥ 90%
-envoyerDocsAutoResilient() — 3 tentatives (0s/30s/2min)
-   SUCCÈS → note Pipedrive + alerte Telegram ✅
-   ÉCHEC  → alertShawnDocsFailed() "🚨 DOCS NON ENVOYÉS"
-         ↓ si match 80-89%
-brouillon Telegram — Shawn dit "envoie"
-         ↓ si match < 80%
-alerte manuelle Shawn (aucun docs envoyés)
-```
+- URL: `https://signaturesb-bot-s272.onrender.com`
+- Health check: `/health`
+- Data dir: `/data/` (Render persistent disk)
+- Fichiers data: `pending_alerts.json`, `pending_leads.json`, `dedup_leads.json`
+- Telegram allowed ID: dans env vars `ALLOWED_ID`
 
 ---
 
-## 🔑 POINTS DE DÉFAILLANCE RÉSOLUS
+## 📌 CONTEXTE BUSINESS
 
-| Bug | Cause | Fix |
-|-----|-------|-----|
-| Deal "Shawn Barrette" | Parser capturait nom d'agent dans HTML Centris | P1: validation + pending |
-| Docs jamais envoyés | Un seul échec = silencieux | P2: retry 3x + alerte |
-| Shawn visible en Cc | cc: visible dans email client | P3: Bcc invisible |
-| Leads incomplets perdus | Pas de pending persistant | P4: JSON sur disque |
+- Shawn Barrette | Courtier RE/MAX PRESTIGE | shawn@signaturesb.com | 514-927-1340
+- 98 prospects sans contact depuis 3j+ → SYSTÈME DE PROTECTION OBLIGATOIRE
+- Leads stagnants jusqu'à 450j → seuils automatiques requis
+- Taux conversion 10% → objectif remonter à 30%+ avec ce système
+- Philosophie: PRÉVENIR avant que ça arrive, jamais réactif
 
 ---
 
-## 📋 CHECKLIST FINALE (après tous les patches)
+## ⚠️ RÈGLES IMPORTANTES
 
-- [ ] P3 Bcc — test envoi email, Shawn invisible
-- [ ] P2 Retry — tester avec `envoyerDocsAuto()` qui throw intentionnellement
-- [ ] P1 Validation — tester avec email Centris qui a nom = "Shawn Barrette"
-- [ ] P4 Pending — tester commande "nom Jean Tremblay" après lead pending
-- [ ] Firecrawl — `node test_firecrawl.js` → 5/5 scénarios passent
-- [ ] Firecrawl — `/firecrawl` affiche quota correct
-- [ ] Firecrawl — "grille zonage Sainte-Julienne" retourne marges latérales
-- [ ] /health — 40+ tools, 0 erreurs
-- [ ] /checkemail — scan 48h sans crash
-- [ ] Lead réel test — confirmer parsing correct + docs envoyés + Shawn en Bcc
+1. Ne JAMAIS deviner l'année — date courante: 2026-04-25
+2. Toujours `node validate.js` avant push
+3. Attendre 90s après push pour que Render redémarre
+4. Vérifier `/health` après chaque déploiement
+5. Si erreur Render → vérifier logs Render dashboard
+6. DATA_DIR = détecter auto (`/data/` si existe, sinon `./data/`)
+
+---
+
+*Sync: Kira bot Telegram ↔ Claude Code — 2026-04-25 22:41*
