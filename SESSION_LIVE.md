@@ -1,10 +1,52 @@
-# SESSION LIVE — 2026-04-25 (mis à jour — CLAUDE CODE EN COURS)
+# SESSION LIVE — 2026-04-27 (mis à jour — CLAUDE CODE EN COURS)
 
 ## 🎯 MISSION PRIORITAIRE — SYSTÈME DE PROTECTION COMPLET
 
 **Demande Shawn:** "Prévenir plutôt que guérir — système de protection qui règle tout avant que ça arrive."
 
 **Fichier à lire EN PREMIER:** `PROTECTION_SYSTEM.md` (déjà dans le repo)
+
+---
+
+## 🆕 NOUVELLE PRIORITÉ — OUTIL SUPPRESSION ACTIVITÉS (ajouter en ÉTAPE 0)
+
+**Demande Shawn (27 avril 2026):** Supprimer les doublons d'activités automatiquement — garder 1 seule activité par contact/deal.
+
+### ÉTAPE 0 — Outil `supprimer_activite` + dédup automatique (20 min)
+
+**Problème:** Quand le bot crée plusieurs activités J+1 pour le même prospect, il y a des doublons (ex: Lounes 20 activités, Jeannot 20 activités).
+
+**Solution à implémenter:**
+
+1. **Ajouter outil MCP `supprimer_activite`** dans bot.js:
+```javascript
+{
+  name: "supprimer_activite",
+  description: "Supprimer une ou toutes les activités en double d'un deal Pipedrive. Garder seulement la plus récente.",
+  parameters: {
+    terme: { type: "string", description: "Nom du prospect" },
+    garder: { type: "string", description: "ID activité à garder (optionnel — sinon garde la plus récente)" }
+  }
+}
+// API: DELETE /v1/activities/{id}
+```
+
+2. **Ajouter fonction `dedupActivites(dealId)`** dans bot.js:
+```javascript
+async function dedupActivites(dealId) {
+  // GET /v1/deals/{id}/activities
+  // Grouper par type
+  // Garder la plus récente de chaque type
+  // DELETE toutes les autres
+}
+```
+
+3. **Appeler `dedupActivites()` AVANT `creerActivite()`** dans `traiterNouveauLead()`:
+```javascript
+// Vérifier si activité du même type existe déjà → skip si oui
+```
+
+4. **Règle absolue:** 1 seule activité "appel" par deal à la fois.
 
 ---
 
@@ -97,13 +139,15 @@ curl https://signaturesb-bot-s272.onrender.com/health
 
 ## ⚠️ RÈGLES IMPORTANTES
 
-1. Ne JAMAIS deviner l'année — date courante: 2026-04-25
+1. Ne JAMAIS deviner l'année — date courante: 2026-04-27
 2. Toujours `node validate.js` avant push
 3. Attendre 90s après push pour que Render redémarre
 4. Vérifier `/health` après chaque déploiement
 5. Si erreur Render → vérifier logs Render dashboard
 6. DATA_DIR = détecter auto (`/data/` si existe, sinon `./data/`)
+7. **RÈGLE ACTIVITÉS:** 1 seule activité par type par deal — vérifier AVANT de créer
+8. **RÈGLE ACTIVITÉS:** Toujours créer sur le deal du prospect, jamais sur un deal séparé
 
 ---
 
-*Sync: Kira bot Telegram ↔ Claude Code — 2026-04-25 22:41*
+*Sync: Kira bot Telegram ↔ Claude Code — 2026-04-27 17:56*
