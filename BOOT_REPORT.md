@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-04-28 02 h 10 min 10 s_
+_2026-04-28 11 h 02 min 50 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 55
-- Uptime: 17s
+- Uptime: 18s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -22,10 +22,10 @@ INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
 OK|GIST|200 faits chargés
+OK|GIST|History restauré depuis Gist: 4 messages sur 1 chats (dernière save: 2026-04-28T06:14:36.391Z)
+INFO|BOOT|Step 5: load session live context
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
 OK|DBX_IDX|Index: 65 dossiers, 334 fichiers · 1s · 58 Centris# · 45 tokens rue
-OK|GIST|History restauré depuis Gist: 2 messages sur 1 chats (dernière save: 2026-04-28T05:51:24.969Z)
-INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (7KB)
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
 OK|BOOT|Gmail Lead Poller + auto-trash CI noise activés
@@ -36,10 +36,10 @@ INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
 OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:200 — tools:55 — port:10000
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
-OK|PREFLIGHT|✅ Claude API accepte les 55 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
-OK|GIST|Poller state restauré: 141 processed, 56 leads
+OK|PREFLIGHT|✅ Claude API accepte les 55 tools
+OK|GIST|Poller state restauré: 142 processed, 56 leads
 OK|GIST|Dedup restauré: 57 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
