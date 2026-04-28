@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-04-28 00 h 52 min 59 s_
+_2026-04-28 01 h 39 min 54 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 55
-- Uptime: 18s
+- Uptime: 19s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -21,11 +21,11 @@ INFO|DBX_IDX|Paths à indexer: /Inscription | /Terrain en ligne
 INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
+OK|GIST|200 faits chargés
+OK|GIST|History restauré depuis Gist: 12 messages sur 1 chats (dernière save: 2026-04-28T05:27:19.707Z)
+INFO|BOOT|Step 5: load session live context
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
 OK|DBX_IDX|Index: 65 dossiers, 334 fichiers · 1s · 58 Centris# · 45 tokens rue
-OK|GIST|200 faits chargés
-OK|GIST|History restauré depuis Gist: 36 messages sur 1 chats (dernière save: 2026-04-28T04:46:11.387Z)
-INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (7KB)
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
 OK|BOOT|Gmail Lead Poller + auto-trash CI noise activés
