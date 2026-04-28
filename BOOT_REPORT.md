@@ -1,5 +1,5 @@
 # ✅ Boot réussi
-_2026-04-28 00 h 10 min 00 s_
+_2026-04-28 00 h 24 min 14 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 50
@@ -21,8 +21,8 @@ INFO|DBX_IDX|Paths à indexer: /Inscription | /Terrain en ligne
 INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
-OK|GIST|195 faits chargés
-OK|GIST|History restauré depuis Gist: 18 messages sur 1 chats (dernière save: 2026-04-27T23:56:03.036Z)
+OK|GIST|200 faits chargés
+OK|GIST|History restauré depuis Gist: 8 messages sur 1 chats (dernière save: 2026-04-28T04:19:54.506Z)
 INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (5KB)
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
@@ -31,7 +31,7 @@ INFO|BOOT|Step 6: registerHandlers
 INFO|BOOT|Step 7: startDailyTasks
 OK|CRON|Tâches: visites 7h, digest 8h→Julie, sync BOT_STATUS chaque heure, monitoring 10min
 INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
-OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:195 — tools:50 — port:10000
+OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:200 — tools:50 — port:10000
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
 OK|DBX_IDX|Index: 65 dossiers, 334 fichiers · 1s · 58 Centris# · 45 tokens rue
 WARN|CENTRIS|Login: HTTP 200 — location: 
