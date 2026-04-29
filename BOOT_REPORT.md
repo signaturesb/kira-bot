@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-04-29 12 h 35 min 08 s_
+_2026-04-29 12 h 51 min 01 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 55
-- Uptime: 18s
+- Uptime: 17s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -22,10 +22,10 @@ INFO|BOOT|Step 2b: refresh mailing plan (Brevo)
 INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
+OK|GIST|200 faits chargés
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
 OK|DBX_IDX|Index: 70 dossiers, 356 fichiers · 1s · 63 Centris# · 48 tokens rue
-OK|GIST|200 faits chargés
-OK|GIST|History restauré depuis Gist: 14 messages sur 1 chats (dernière save: 2026-04-29T16:33:28.851Z)
+OK|GIST|History restauré depuis Gist: 1 messages sur 1 chats (dernière save: 2026-04-29T16:46:12.677Z)
 INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (7KB)
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
@@ -41,7 +41,7 @@ OK|MAILING|Plan refreshed: 8 pending · 6 récentes
 OK|PREFLIGHT|✅ Claude API accepte les 55 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
-OK|GIST|Poller state restauré: 148 processed, 60 leads
+OK|GIST|Poller state restauré: 149 processed, 61 leads
 OK|GIST|Dedup restauré: 63 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
