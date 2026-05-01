@@ -1,5 +1,5 @@
 # 🚨 uncaughtException
-_2026-05-01 05 h 06 min 36 s_
+_2026-05-01 05 h 07 min 36 s_
 
 ## Erreur
 ```
@@ -57,7 +57,7 @@ OK|SYNC|BOT_STATUS.md → kira-bot (stats anonymes, 100 deals)
 ## Environnement
 - Node: v22.22.0
 - Platform: linux
-- Memory: {"rss":142270464,"heapTotal":34332672,"heapUsed":27178192,"external":4807187,"arrayBuffers":1169143}
+- Memory: {"rss":142270464,"heapTotal":34332672,"heapUsed":27426576,"external":5225682,"arrayBuffers":1553876}
 - Env vars présents: 141
 
 **Claude Code peut lire ce fichier avec:**
