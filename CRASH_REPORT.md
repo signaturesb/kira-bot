@@ -1,11 +1,11 @@
 # 🚨 uncaughtException
-_2026-05-02 21 h 59 min 36 s_
+_2026-05-03 05 h 00 min 36 s_
 
 ## Erreur
 ```
 m is not defined
 ReferenceError: m is not defined
-    at Timeout._onTimeout (/opt/render/project/src/bot.js:9522:43)
+    at Timeout._onTimeout (/opt/render/project/src/bot.js:9504:20)
     at listOnTimeout (node:internal/timers:588:17)
     at process.processTimers (node:internal/timers:523:7)
 ```
@@ -57,7 +57,7 @@ OK|SYNC|BOT_STATUS.md → kira-bot (stats anonymes, 100 deals)
 ## Environnement
 - Node: v22.22.0
 - Platform: linux
-- Memory: {"rss":161394688,"heapTotal":34856960,"heapUsed":28823696,"external":5865861,"arrayBuffers":2231193}
+- Memory: {"rss":162361344,"heapTotal":34332672,"heapUsed":30353992,"external":7677142,"arrayBuffers":4038571}
 - Env vars présents: 141
 
 **Claude Code peut lire ce fichier avec:**
