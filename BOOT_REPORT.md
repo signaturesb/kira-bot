@@ -1,5 +1,5 @@
 # ✅ Boot réussi
-_2026-05-05 18 h 53 min 36 s_
+_2026-05-05 18 h 55 min 21 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 58
@@ -23,10 +23,10 @@ INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
 OK|GIST|135 faits chargés
-OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
-OK|DBX_IDX|Index: 76 dossiers, 375 fichiers · 1s · 69 Centris# · 55 tokens rue
 OK|GIST|History restauré depuis Gist: 4 messages sur 1 chats (dernière save: 2026-05-05T16:52:08.582Z)
 INFO|BOOT|Step 5: load session live context
+OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
+OK|DBX_IDX|Index: 76 dossiers, 375 fichiers · 1s · 69 Centris# · 55 tokens rue
 OK|SYNC|SESSION_LIVE.md chargé (7KB)
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
 OK|BOOT|Gmail Lead Poller + auto-trash CI noise activés
@@ -45,5 +45,8 @@ OK|GIST|Poller state restauré: 253 processed, 95 leads
 OK|GIST|Dedup restauré: 40 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
+WARN|SECRETS|create_folder 401: {"error":{".tag":"missing_scope","required_scope":"files.content.write"},"error_summary":"missing_scope/"}
+WARN|SECRETS|uploadDropboxSecret OPENAI_API_KEY: HTTP 401: {"error_summary": "missing_scope/", "error": {".tag": "missing_scope", "required_scope": "files.content.write"}}
+INFO|AUDIT|secret/set {"key":"OPENAI_API_KEY","via":"admin-universal","tested":true,"persisted":false,"dbxErr":"HTTP 401: 
 OK|BOOT|✅ Pre-flight: 8/8 OK
 ```
