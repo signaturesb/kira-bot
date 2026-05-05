@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-05-05 12 h 49 min 36 s_
+_2026-05-05 12 h 55 min 38 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 58
-- Uptime: 19s
+- Uptime: 17s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -22,11 +22,11 @@ INFO|BOOT|Step 2b: refresh mailing plan (Brevo)
 INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
-OK|GIST|131 faits chargés
-OK|GIST|History restauré depuis Gist: 14 messages sur 1 chats (dernière save: 2026-05-05T16:33:24.347Z)
-INFO|BOOT|Step 5: load session live context
+OK|GIST|133 faits chargés
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
 OK|DBX_IDX|Index: 76 dossiers, 375 fichiers · 1s · 69 Centris# · 55 tokens rue
+OK|GIST|History restauré depuis Gist: 4 messages sur 1 chats (dernière save: 2026-05-05T16:52:08.582Z)
+INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (7KB)
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
 OK|BOOT|Gmail Lead Poller + auto-trash CI noise activés
@@ -34,7 +34,7 @@ INFO|BOOT|Step 6: registerHandlers
 INFO|BOOT|Step 7: startDailyTasks
 OK|CRON|Tâches: visites 7h, digest 8h→Julie, sync BOT_STATUS chaque heure, monitoring 10min
 INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
-OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:131 — tools:58 — port:10000
+OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:133 — tools:58 — port:10000
 OK|MAILING|Plan refreshed: 8 pending · 6 récentes
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
