@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-05-05 18 h 55 min 21 s_
+_2026-05-05 18 h 57 min 14 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 58
-- Uptime: 17s
+- Uptime: 18s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -13,7 +13,7 @@ INFO|BOOT|Step 0: server.listen(10000) [CRITICAL]
 INFO|BOOT|Step 1: refresh Dropbox token
 OK|BOOT|HTTP server listening on port 10000
 OK|DROPBOX|Token rafraîchi ✓
-INFO|BOOT|Step 1b: load secrets from Dropbox
+INFO|BOOT|Step 1b: load secrets (local persistent disk + Dropbox)
 INFO|SECRETS|Dossier /bot-secrets absent (normal si jamais utilisé)
 INFO|BOOT|Step 2: load Dropbox structure + index
 OK|DROPBOX|Structure: 76 listings (Terrain en ligne: 43, Inscription: 33), 5 sections
@@ -35,9 +35,9 @@ INFO|BOOT|Step 7: startDailyTasks
 OK|CRON|Tâches: visites 7h, digest 8h→Julie, sync BOT_STATUS chaque heure, monitoring 10min
 INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
 OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:135 — tools:58 — port:10000
+OK|MAILING|Plan refreshed: 7 pending · 7 récentes
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
-OK|MAILING|Plan refreshed: 7 pending · 7 récentes
 OK|PREFLIGHT|✅ Claude API accepte les 58 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
@@ -45,8 +45,5 @@ OK|GIST|Poller state restauré: 253 processed, 95 leads
 OK|GIST|Dedup restauré: 40 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
-WARN|SECRETS|create_folder 401: {"error":{".tag":"missing_scope","required_scope":"files.content.write"},"error_summary":"missing_scope/"}
-WARN|SECRETS|uploadDropboxSecret OPENAI_API_KEY: HTTP 401: {"error_summary": "missing_scope/", "error": {".tag": "missing_scope", "required_scope": "files.content.write"}}
-INFO|AUDIT|secret/set {"key":"OPENAI_API_KEY","via":"admin-universal","tested":true,"persisted":false,"dbxErr":"HTTP 401: 
 OK|BOOT|✅ Pre-flight: 8/8 OK
 ```
