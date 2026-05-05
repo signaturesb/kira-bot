@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-05-05 18 h 57 min 14 s_
+_2026-05-05 19 h 47 min 49 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 58
-- Uptime: 18s
+- Uptime: 19s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -41,8 +41,8 @@ WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
 OK|PREFLIGHT|✅ Claude API accepte les 58 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
-OK|GIST|Poller state restauré: 253 processed, 95 leads
-OK|GIST|Dedup restauré: 40 entries
+OK|GIST|Poller state restauré: 254 processed, 96 leads
+OK|GIST|Dedup restauré: 44 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
 OK|BOOT|✅ Pre-flight: 8/8 OK
