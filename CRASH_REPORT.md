@@ -1,5 +1,5 @@
 # 🚨 uncaughtException
-_2026-05-05 05 h 02 min 43 s_
+_2026-05-05 05 h 03 min 43 s_
 
 ## Erreur
 ```
@@ -71,7 +71,7 @@ OK|DOCS|Master template Dropbox utilisé (62KB avec logos) — sections vides re
 ## Environnement
 - Node: v22.22.0
 - Platform: linux
-- Memory: {"rss":127983616,"heapTotal":32575488,"heapUsed":28619056,"external":5965330,"arrayBuffers":2328151}
+- Memory: {"rss":127983616,"heapTotal":32575488,"heapUsed":29512144,"external":6275970,"arrayBuffers":2637925}
 - Env vars présents: 140
 
 **Claude Code peut lire ce fichier avec:**
