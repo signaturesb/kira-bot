@@ -1,5 +1,5 @@
 # ✅ Boot réussi
-_2026-05-05 13 h 34 min 18 s_
+_2026-05-05 13 h 44 min 08 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 58
@@ -33,17 +33,18 @@ INFO|BOOT|Step 7: startDailyTasks
 OK|CRON|Tâches: visites 7h, digest 8h→Julie, sync BOT_STATUS chaque heure, monitoring 10min
 INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
 OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:133 — tools:58 — port:10000
+OK|MAILING|Plan refreshed: 8 pending · 6 récentes
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
-OK|DBX_IDX|Index: 76 dossiers, 375 fichiers · 1s · 69 Centris# · 55 tokens rue
+OK|DBX_IDX|Index: 76 dossiers, 375 fichiers · 2s · 69 Centris# · 55 tokens rue
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
-OK|MAILING|Plan refreshed: 8 pending · 6 récentes
 OK|PREFLIGHT|✅ Claude API accepte les 58 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
-OK|GIST|Poller state restauré: 250 processed, 93 leads
+OK|GIST|Poller state restauré: 251 processed, 93 leads
 OK|GIST|Dedup restauré: 46 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
 OK|BOOT|✅ Pre-flight: 8/8 OK
+WARN|HEALTH|1 fail: pipedrive=✅ brevo=✅ dropbox=✅ anthropic=✅ openai=❌
 ```
