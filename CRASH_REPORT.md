@@ -1,5 +1,5 @@
 # 🚨 uncaughtException
-_2026-05-06 05 h 48 min 40 s_
+_2026-05-06 05 h 49 min 40 s_
 
 ## Erreur
 ```
@@ -61,7 +61,7 @@ WARN|SECURITY|SMS bridge bad HMAC from ::ffff:10.28.86.133
 ## Environnement
 - Node: v22.22.0
 - Platform: linux
-- Memory: {"rss":118931456,"heapTotal":30044160,"heapUsed":26456736,"external":6991430,"arrayBuffers":3319425}
+- Memory: {"rss":118931456,"heapTotal":30044160,"heapUsed":23152904,"external":4119680,"arrayBuffers":481635}
 - Env vars présents: 140
 
 **Claude Code peut lire ce fichier avec:**
