@@ -1,11 +1,11 @@
 # 🚨 uncaughtException
-_2026-05-09 21 h 59 min 43 s_
+_2026-05-10 05 h 00 min 44 s_
 
 ## Erreur
 ```
 m is not defined
 ReferenceError: m is not defined
-    at Timeout._onTimeout (/opt/render/project/src/bot.js:10656:43)
+    at Timeout._onTimeout (/opt/render/project/src/bot.js:10638:20)
     at listOnTimeout (node:internal/timers:588:17)
     at process.processTimers (node:internal/timers:523:7)
 ```
@@ -61,7 +61,7 @@ WARN|SECURITY|SMS bridge bad HMAC from ::ffff:10.28.86.133
 ## Environnement
 - Node: v22.22.0
 - Platform: linux
-- Memory: {"rss":137273344,"heapTotal":37113856,"heapUsed":31891656,"external":6408769,"arrayBuffers":2766821}
+- Memory: {"rss":138567680,"heapTotal":38244352,"heapUsed":33651648,"external":7684224,"arrayBuffers":4023583}
 - Env vars présents: 140
 
 **Claude Code peut lire ce fichier avec:**
