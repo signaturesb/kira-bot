@@ -1,5 +1,5 @@
 # 🚨 uncaughtException
-_2026-05-11 05 h 59 min 45 s_
+_2026-05-12 05 h 00 min 36 s_
 
 ## Erreur
 ```
@@ -25,8 +25,8 @@ INFO|BOOT|Step 2b: refresh mailing plan (Brevo)
 INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
-OK|GIST|135 faits chargés
-OK|GIST|History restauré depuis Gist: 4 messages sur 1 chats (dernière save: 2026-05-05T16:52:08.582Z)
+OK|GIST|153 faits chargés
+OK|GIST|History restauré depuis Gist: 18 messages sur 1 chats (dernière save: 2026-05-11T02:20:09.220Z)
 INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (7KB)
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
@@ -35,17 +35,17 @@ INFO|BOOT|Step 6: registerHandlers
 INFO|BOOT|Step 7: startDailyTasks
 OK|CRON|Tâches: visites 7h, digest 8h→Julie, sync BOT_STATUS chaque heure, monitoring 10min
 INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
-OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:135 — tools:58 — port:10000
+OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:153 — tools:58 — port:10000
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
-OK|DBX_IDX|Index: 76 dossiers, 375 fichiers · 1s · 69 Centris# · 55 tokens rue
-OK|MAILING|Plan refreshed: 7 pending · 7 récentes
+OK|DBX_IDX|Index: 76 dossiers, 376 fichiers · 1s · 69 Centris# · 55 tokens rue
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
+OK|MAILING|Plan refreshed: 7 pending · 7 récentes
 OK|PREFLIGHT|✅ Claude API accepte les 58 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
-OK|GIST|Poller state restauré: 254 processed, 96 leads
-OK|GIST|Dedup restauré: 44 entries
+OK|GIST|Poller state restauré: 289 processed, 104 leads
+OK|GIST|Dedup restauré: 29 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
 OK|BOOT|✅ Pre-flight: 8/8 OK
@@ -53,15 +53,12 @@ OK|BOOT|BOOT_REPORT.md écrit dans GitHub
 OK|HEALTH|Anthropic OK (healthcheck Haiku)
 OK|SYNC|BOT_STATUS.md → kira-bot (stats anonymes, 100 deals)
 WARN|HEALTH|1 fail: pipedrive=✅ brevo=✅ dropbox=✅ anthropic=✅ openai=❌
-INFO|VEILLE|Backup check campagnes suspended pour demain...
-INFO|VEILLE|Aucune campagne pour demain (2026-05-06)
-WARN|SECURITY|SMS bridge bad HMAC from ::ffff:10.28.86.133
 ```
 
 ## Environnement
 - Node: v22.22.0
 - Platform: linux
-- Memory: {"rss":143216640,"heapTotal":33189888,"heapUsed":28599432,"external":5149580,"arrayBuffers":1507632}
+- Memory: {"rss":120721408,"heapTotal":30830592,"heapUsed":25187600,"external":5682694,"arrayBuffers":2044649}
 - Env vars présents: 140
 
 **Claude Code peut lire ce fichier avec:**
