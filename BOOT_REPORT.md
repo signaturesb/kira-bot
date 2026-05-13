@@ -1,5 +1,5 @@
 # ✅ Boot réussi
-_2026-05-13 13 h 42 min 20 s_
+_2026-05-13 13 h 54 min 39 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 58
@@ -37,7 +37,7 @@ INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
 OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:153 — tools:58 — port:10000
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
-OK|MAILING|Plan refreshed: 7 pending · 7 récentes
+OK|MAILING|Plan refreshed: 6 pending · 7 récentes
 OK|PREFLIGHT|✅ Claude API accepte les 58 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
