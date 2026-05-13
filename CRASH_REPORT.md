@@ -1,5 +1,5 @@
 # 🚨 uncaughtException
-_2026-05-13 05 h 06 min 37 s_
+_2026-05-13 05 h 07 min 37 s_
 
 ## Erreur
 ```
@@ -58,7 +58,7 @@ WARN|HEALTH|1 fail: pipedrive=✅ brevo=✅ dropbox=✅ anthropic=✅ openai=❌
 ## Environnement
 - Node: v22.22.0
 - Platform: linux
-- Memory: {"rss":150384640,"heapTotal":35287040,"heapUsed":31477168,"external":7611821,"arrayBuffers":3973776}
+- Memory: {"rss":150384640,"heapTotal":35287040,"heapUsed":27384232,"external":4627292,"arrayBuffers":988721}
 - Env vars présents: 140
 
 **Claude Code peut lire ce fichier avec:**
