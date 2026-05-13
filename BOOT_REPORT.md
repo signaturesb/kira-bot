@@ -1,5 +1,5 @@
 # ✅ Boot réussi
-_2026-05-13 13 h 28 min 10 s_
+_2026-05-13 13 h 42 min 20 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 58
@@ -25,6 +25,8 @@ INFO|BOOT|Step 4: load memory + history
 OK|GIST|153 faits chargés
 OK|GIST|History restauré depuis Gist: 18 messages sur 1 chats (dernière save: 2026-05-11T02:20:09.220Z)
 INFO|BOOT|Step 5: load session live context
+OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
+OK|DBX_IDX|Index: 76 dossiers, 376 fichiers · 1s · 69 Centris# · 55 tokens rue
 OK|SYNC|SESSION_LIVE.md chargé (7KB)
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
 OK|BOOT|Gmail Lead Poller + auto-trash CI noise activés
@@ -33,11 +35,9 @@ INFO|BOOT|Step 7: startDailyTasks
 OK|CRON|Tâches: visites 7h, digest 8h→Julie, sync BOT_STATUS chaque heure, monitoring 10min
 INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
 OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:153 — tools:58 — port:10000
-OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
-OK|DBX_IDX|Index: 76 dossiers, 376 fichiers · 1s · 69 Centris# · 55 tokens rue
-OK|MAILING|Plan refreshed: 7 pending · 7 récentes
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
+OK|MAILING|Plan refreshed: 7 pending · 7 récentes
 OK|PREFLIGHT|✅ Claude API accepte les 58 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
