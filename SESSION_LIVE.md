@@ -1,197 +1,79 @@
-# SESSION LIVE — 2026-05-14 (mis à jour)
+# SESSION_LIVE — Travail Claude Code en temps réel
 
-## 🔴 PRIORITÉ #0 URGENT — FIX telecharger_fiche_centris (BRISÉ)
-
-**Problème confirmé (14 mai 2026):** L'outil `telecharger_fiche_centris` échoue sur TOUS les listings actifs (ex: #27779328, #25302702). Le scraper tente 4 URLs PDF + 3 pages listing mais aucune ne fonctionne — Centris a changé son format d'URL.
-
-**Message d'erreur:** `❌ Fiche PDF non trouvée — 4 URLs PDF directs + 3 pages listing tentés`
-
-### DIAGNOSTIC À FAIRE (Claude Code):
-
-1. **Ouvrir `bot.js`** et chercher la fonction `telechargerFicheCentris` (ou `CENTRIS_USER`)
-2. **Logger les URLs exactes testées** — probablement hardcodées comme:
-   - `https://agent.centris.ca/Matrix/Public/Portal/..`
-   - `https://www.centris.ca/fr/proprietes~..`
-3. **Tester manuellement** avec les credentials `110509` / `Milf1340@`:
-   ```bash
-   curl -c /tmp/centris_cookies.txt -b /tmp/centris_cookies.txt \
-     -L "https://agent.centris.ca/Matrix/Search/..." \
-     -H "User-Agent: Mozilla/5.0"
-   ```
-4. **Identifier les nouvelles URLs** en inspectant `agent.centris.ca` avec les credentials
-
-### STRATÉGIE DE FIX:
-
-**Option A (préférée) — Puppeteer headless:**
-```javascript
-// Se connecter via browser headless, naviguer jusqu'au listing, télécharger le PDF
-const browser = await puppeteer.launch({ headless: true });
-const page = await browser.newPage();
-await page.goto('https://agent.centris.ca');
-// Login avec credentials
-await page.type('#username', process.env.CENTRIS_USER);
-await page.type('#password', process.env.CENTRIS_PASS);
-await page.click('button[type=submit]');
-// Naviguer au listing
-await page.goto(`https://agent.centris.ca/Matrix/.../${centrisNum}`);
-// Déclencher export PDF
-```
-
-**Option B — Reverse engineer les nouvelles URLs:**
-- Inspecter les requêtes réseau dans agent.centris.ca
-- Identifier le pattern d'URL PDF 2026
-- Mettre à jour les URLs dans bot.js
-
-**Option C (fallback rapide) — Centris public:**
-```javascript
-// www.centris.ca/fr/proprietes~a-vendre~{type}/{ville}/{id}
-// Scraper la page publique → PDF printable
-const url = `https://www.centris.ca/fr/proprietes~a-vendre~terrain/${centrisNum}`;
-```
-
-### VARIABLES ENV CENTRIS:
-```
-CENTRIS_USER=110509
-CENTRIS_PASS=Milf1340@
-```
-(Déjà dans Render — NE PAS modifier)
-
-### TEST DE VALIDATION:
-Après fix → tester avec Shawn via Telegram:
-```
-"Envoie à shawnbarrette@icloud.com la fiche du #27779328"
-```
-Résultat attendu: email avec PDF reçu à shawnbarrette@icloud.com ✅
+> Synchronisé via git push vers `kira-bot` repo. Bot Telegram lit ce fichier toutes les 30 min via `loadSessionLiveContext()` (bot.js:10603).
+> Dernière maj: **2026-05-14 05:25 UTC** par session Claude Code marathon
 
 ---
 
-## 🔴 PRIORITÉ #1 — ZONAGE PDF → TELEGRAM → EMAIL
+## 🎯 Session 2026-05-13/14 — État actuel
 
-**Demande Shawn (14 mai 2026):** Scraper intelligent zonage → grille PDF dans Telegram → Shawn dit "envoie à email@" → bot envoie au client avec Shawn en Cc.
+### ✅ DÉPLOYÉS (Render bot-assistant main):
+- `cf83ccf` health check AssemblyAI primaire + OpenAI fallback
+- `5590e87` backup Dropbox auto-refresh + fallback disk
+- `38b8d0c` veille J-1 sur Render 24/7 + boutons inline
+- `f4e40ae` Cc Shawn auto sur tous sendNow Brevo
+- `ef021d8` Pipedrive cleanup catégorie (D) Shawn-as-contact
+- `cf5ee04` BLOC A6+A7+B + analyser_zonage_adresse (4 features)
+- `2e66aa5` Dropbox uploadDropboxSecret auto-refresh 401
+- `7d4380a` centrisLogin() utilise OAuth Auth0 + MFA SMS
+- `59a887a` AssemblyAI primaire + Whisper fallback transcription
+- `04f92e1` centris-oauth Auth0 new flow identifier/password split + debug
+- `1e4461b` /admin/centris-mfa-code endpoint (Gmail OAuth)
+- `4e558e7` /admin/centris-fetch debug endpoint
 
-**Fichier à lire EN PREMIER:** `ZONAGE_PDF_WORKFLOW.md` (créé aujourd'hui)
+### ✅ INFRASTRUCTURE Mac autonome:
+- `com.signaturesb.centris-auto-login` LaunchAgent — toutes 12h + boot
+- `com.signaturesb.sms-bridge` LaunchAgent — chat.db poll + clipboard
+- Full Disk Access activé pour `/usr/local/bin/node`
+- **28 LaunchAgents signaturesb totaux**
 
-### ÉTAPES À FAIRE (dans l'ordre):
+### 🔴 BUG EN COURS — Centris fiche officielle Matrix
+**Description:** `telechargerFicheCentris` utilise `CENTRIS_BASE = 'https://www.centris.ca'` avec URLs `/MX/PrintSheet/{num}` qui sont d'un ancien portail agent.centris.ca retiré.
 
-**1. Ajouter FIRECRAWL_API_KEY dans Render (2 min)**
-- Dashboard Render → signaturesb-bot-s272 → Environment
-- Ajouter: `FIRECRAWL_API_KEY=fc-52e378f6759746e4807406ddc3517d07`
-- Ajouter: `FIRECRAWL_QUOTA_MONTHLY=500`
+**Tests faits dans cette session:**
+- ❌ `/Matrix/Public/Portal.aspx?L=1&K=1&p=DE-1-1-XXX` → erreurs
+- ❌ `/Matrix/Listing/XXX`, `/Matrix/Property/XXX` → 404
+- ❌ `/Matrix/Public/Print/XXX` → 404
+- ❌ `https://media.centris.ca/property/XXX/sheet.pdf` → 0 bytes
 
-**2. Ajouter dans bot.js (lire ZONAGE_PDF_WORKFLOW.md section par section):**
+**Centris a probablement migré les URLs PDF en 2026**. Next iter: explorer Matrix UI manuellement (Playwright) pour trouver le bouton "Print PDF" et capturer son URL réelle via network requests.
+
+### ⚠️ Centris session stability
+Les cookies Matrix expirent ou sont invalidés quand:
+- Login trop rapide successif
+- Plusieurs sessions parallèles
+- Activity sur autre device
+
+Le `centris-auto-login` LaunchAgent refresh toutes les 12h mais sessions peuvent être invalidées entre temps.
+
+### ✅ Ce qui MARCHE pour Shawn aujourd'hui
+
+**Pour SES listings (dans Dropbox `/Terrain en ligne/` ou `/Inscription/`):**
+- `Envoie tout sur #22264330 à client@email.com` → docs Dropbox + Cc shawn@ auto
+- Idem #10102238, #19070453, #25244988, etc.
+
+**Autres outils 100% fonctionnels:**
+- Pipedrive cleanup, deal creation, activité
+- Brevo campaigns + veille J-1 + Cc Shawn auto
+- Firecrawl zonage municipal (clé fc-5...7d07 active)
+- AssemblyAI transcription (5h/mois gratuit)
+- Gmail email + scraping leads
+
+### 🔬 TODO immédiat next session
+1. **Fix Centris URLs Matrix 2026** — capture flow via Playwright network panel
+2. **Investiguer pourquoi Centris invalide sessions rapides** — peut-être inserer délai 30s entre login attempts
+3. **Test live avec un listing actif** — confirmer que le fix marche
+
+### 📊 Health check actuel
 ```
-- Import pdf-lib (déjà dans package.json ✅)
-- Import firecrawl_scraper.js (déjà présent ✅)
-- Fonction analyserZonageRue(adresse, ville)
-- Fonction extractZoneFromRue(markdown, adresse)
-- Fonction extractGrilleZone(markdown, zone)
-- Fonction genererPDFZonage(data) → Buffer via pdf-lib
-- Fonction envoyerZonageTelegram(data, chatId)
-- Fonction envoyerZonageEmail(emailClient, chatId)
-- Fonction verifierTriplex(grille)
-- Détection pattern "envoie à email@" dans handler Telegram
-- Détection pattern "zonage [rue] [ville]" → déclenche workflow
+✅ pipedrive, brevo, dropbox, anthropic, transcribe (assemblyai)
+0 fails — score 100/100
 ```
-
-**3. Test live avec: "zonage rue Aumont Saint-Calixte"**
-
-### RÉSULTAT ATTENDU:
-```
-Shawn: "zonage rue Aumont Saint-Calixte"
-Bot: scrape → trouve zone → génère PDF → envoie dans Telegram
-Bot: "Zone R-2 identifiée. Triplex: à vérifier. Dis 'envoie à email@' pour transférer."
-Shawn: "envoie à client@email.com"
-Bot: Email envoyé au client, Shawn en Cc ✅
-```
-
-### NOTE TRIPLEX (question initiale):
-- Zone R-1 → unifamilial seulement ❌
-- Zone R-2 → bifamilial standard, triplex à vérifier
-- Zone R-3 ou M → triplex permis ✅
-- Bot indique automatiquement dans le PDF
-
-### PDF GÉNÉRÉ AVEC pdf-lib (pas PDFKit):
-- `pdf-lib` déjà dans package.json ✅
-- Fond #0a0a0a, rouge #aa0721, style Signature SB
-- Tableau: zone, marges, hauteur max, superficie min, usages
-- Footer: source, date, téléphone municipalité, shawn@signaturesb.com
-- Sauvegardé dans /data/last_zonage.pdf pour envoi email ultérieur
-- Contexte sauvegardé dans /data/last_zonage_context.json
 
 ---
 
-## 🎯 RÈGLE ABSOLUE ACTIVITÉS (priorité #2)
-
-**Demande Shawn (28 avril 2026):** NE PAS créer doublon — mettre à jour activité existante avec nouvelle date.
-
-### LOGIQUE:
-```
-AVANT toute création d'activité → vérifier si activité du même type existe:
-SI trouvée → MODIFIER date (PUT /v1/activities/{id})
-SI non trouvée → CRÉER (POST /v1/activities)
-RÉSULTAT: toujours 1 seule activité active par type par deal
-```
-
-### FONCTION upsertActivite(dealId, type, date, heure, sujet):
-```javascript
-// 1. GET /v1/deals/{dealId}/activities?done=0
-// 2. Chercher activité du même type
-// 3. Si trouvée → PUT avec nouvelle date
-// 4. Si non trouvée → POST nouvelle activité
-```
-
-**Remplacer dans:** traiterNouveauLead() + creerActivite() tool MCP
-
----
-
-## 🛡️ SYSTÈME PROTECTION (priorité #3)
-
-**Fichier:** `PROTECTION_SYSTEM.md`
-
-Ordre d'implémentation:
-- N1: Alerte J+1 automatique
-- N2: Rapport matin 8h30
-- N3: Cron horaire seuils stagnation
-- N4: Hygiene CRM quotidienne 9h
-- N5: Digest hebdo dimanche 20h
-
----
-
-## 🔧 VARIABLES D'ENVIRONNEMENT (Render)
-
-- `PIPEDRIVE_API_KEY` ✅
-- `TELEGRAM_BOT_TOKEN` ✅
-- `GMAIL_CLIENT_ID` + `GMAIL_CLIENT_SECRET` + `GMAIL_REFRESH_TOKEN` ✅
-- `DROPBOX_APP_KEY` + `DROPBOX_APP_SECRET` + `DROPBOX_REFRESH_TOKEN` ✅
-- `OPENAI_API_KEY` ✅ (Whisper vocal)
-- `CENTRIS_USER=110509` ✅
-- `CENTRIS_PASS=Milf1340@` ✅
-- `FIRECRAWL_API_KEY=fc-52e378f6759746e4807406ddc3517d07` ← **AJOUTER MAINTENANT**
-- `FIRECRAWL_QUOTA_MONTHLY=500` ← **AJOUTER MAINTENANT**
-
----
-
-## 🏗️ ARCHITECTURE BOT
-
-- URL: `https://signaturesb-bot-s272.onrender.com`
-- Health: `/health`
-- Data: `/data/` (persistent disk Render)
-- Fichiers data: `last_zonage.pdf`, `last_zonage_context.json`, `pending_alerts.json`
-
----
-
-## ⚠️ RÈGLES IMPORTANTES
-
-1. Ne JAMAIS deviner l'année — date courante: 2026-05-14
-2. Toujours `node validate.js` avant push
-3. Attendre 90s après push pour Render
-4. Vérifier `/health` après chaque déploiement
-5. DATA_DIR = auto (`/data/` si existe, sinon `./data/`)
-6. **RÈGLE ACTIVITÉS:** upsertActivite() partout — jamais POST brut
-7. **RÈGLE ACTIVITÉS:** 1 seule activité active par type par deal
-8. **pdf-lib** = librairie PDF à utiliser (déjà installée, pas PDFKit)
-9. **firecrawl_scraper.js** = déjà présent dans le repo ✅
-
----
-
-*Sync: Kira bot Telegram ↔ Claude Code — 2026-05-14 23:55*
+## 📂 Pour ChatGPT/agents externes qui suivent
+- Repo principal: `github.com/signaturesb/kira-bot`
+- Bot status: `github.com/signaturesb/bot-assistant/raw/main/BOT_STATUS.md`
+- Health live: `https://signaturesb-bot-s272.onrender.com/admin/health`
+- SESSION_LIVE.md ← ce fichier (kira-bot raw)
