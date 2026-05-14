@@ -1,7 +1,7 @@
 # SESSION_LIVE — Travail Claude Code en temps réel
 
 > Synchronisé via git push vers `kira-bot` repo. Bot Telegram lit ce fichier toutes les 30 min via `loadSessionLiveContext()` (bot.js:10603).
-> Dernière maj: **2026-05-14 05:25 UTC** par session Claude Code marathon
+> Dernière maj: **2026-05-14 05:35 UTC** — Centris fallback lien public
 
 ---
 
@@ -27,7 +27,17 @@
 - Full Disk Access activé pour `/usr/local/bin/node`
 - **28 LaunchAgents signaturesb totaux**
 
-### 🔴 BUG EN COURS — Centris fiche officielle Matrix
+### ✅ FIX 05:35 UTC — `f43d845` Centris fallback lien public
+**Solution pragmatique:** Si PDF Matrix inaccessible, envoie email pro Signature SB avec **lien Centris.ca public** + photos + détails + Cc Shawn auto.
+
+Flow multi-stratégies dans `telechargerFicheCentris`:
+0. **Pré-check** listing existe sur Centris.ca public → si 404, message clair "MLS invalide"
+1-2. Try URLs Matrix legacy (peut encore marcher pour certains)
+3. **Fallback** `_envoyerListingPubliqueLink` — email HTML stylé avec bouton CTA vers fiche publique
+
+**Test possible:** `Envoie #22264330 à client@email.com` → reçoit email pro avec lien fiche complète Centris.ca + photos.
+
+### 🟡 BUG RÉSIDUEL — PDF officiel Matrix (annexes DV, certificat)
 **Description:** `telechargerFicheCentris` utilise `CENTRIS_BASE = 'https://www.centris.ca'` avec URLs `/MX/PrintSheet/{num}` qui sont d'un ancien portail agent.centris.ca retiré.
 
 **Tests faits dans cette session:**
