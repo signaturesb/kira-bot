@@ -1,6 +1,71 @@
 # SESSION LIVE — 2026-05-14 (mis à jour)
 
-## 🔴 PRIORITÉ #1 AUJOURD'HUI — ZONAGE PDF → TELEGRAM → EMAIL
+## 🔴 PRIORITÉ #0 URGENT — FIX telecharger_fiche_centris (BRISÉ)
+
+**Problème confirmé (14 mai 2026):** L'outil `telecharger_fiche_centris` échoue sur TOUS les listings actifs (ex: #27779328, #25302702). Le scraper tente 4 URLs PDF + 3 pages listing mais aucune ne fonctionne — Centris a changé son format d'URL.
+
+**Message d'erreur:** `❌ Fiche PDF non trouvée — 4 URLs PDF directs + 3 pages listing tentés`
+
+### DIAGNOSTIC À FAIRE (Claude Code):
+
+1. **Ouvrir `bot.js`** et chercher la fonction `telechargerFicheCentris` (ou `CENTRIS_USER`)
+2. **Logger les URLs exactes testées** — probablement hardcodées comme:
+   - `https://agent.centris.ca/Matrix/Public/Portal/..`
+   - `https://www.centris.ca/fr/proprietes~..`
+3. **Tester manuellement** avec les credentials `110509` / `Milf1340@`:
+   ```bash
+   curl -c /tmp/centris_cookies.txt -b /tmp/centris_cookies.txt \
+     -L "https://agent.centris.ca/Matrix/Search/..." \
+     -H "User-Agent: Mozilla/5.0"
+   ```
+4. **Identifier les nouvelles URLs** en inspectant `agent.centris.ca` avec les credentials
+
+### STRATÉGIE DE FIX:
+
+**Option A (préférée) — Puppeteer headless:**
+```javascript
+// Se connecter via browser headless, naviguer jusqu'au listing, télécharger le PDF
+const browser = await puppeteer.launch({ headless: true });
+const page = await browser.newPage();
+await page.goto('https://agent.centris.ca');
+// Login avec credentials
+await page.type('#username', process.env.CENTRIS_USER);
+await page.type('#password', process.env.CENTRIS_PASS);
+await page.click('button[type=submit]');
+// Naviguer au listing
+await page.goto(`https://agent.centris.ca/Matrix/.../${centrisNum}`);
+// Déclencher export PDF
+```
+
+**Option B — Reverse engineer les nouvelles URLs:**
+- Inspecter les requêtes réseau dans agent.centris.ca
+- Identifier le pattern d'URL PDF 2026
+- Mettre à jour les URLs dans bot.js
+
+**Option C (fallback rapide) — Centris public:**
+```javascript
+// www.centris.ca/fr/proprietes~a-vendre~{type}/{ville}/{id}
+// Scraper la page publique → PDF printable
+const url = `https://www.centris.ca/fr/proprietes~a-vendre~terrain/${centrisNum}`;
+```
+
+### VARIABLES ENV CENTRIS:
+```
+CENTRIS_USER=110509
+CENTRIS_PASS=Milf1340@
+```
+(Déjà dans Render — NE PAS modifier)
+
+### TEST DE VALIDATION:
+Après fix → tester avec Shawn via Telegram:
+```
+"Envoie à shawnbarrette@icloud.com la fiche du #27779328"
+```
+Résultat attendu: email avec PDF reçu à shawnbarrette@icloud.com ✅
+
+---
+
+## 🔴 PRIORITÉ #1 — ZONAGE PDF → TELEGRAM → EMAIL
 
 **Demande Shawn (14 mai 2026):** Scraper intelligent zonage → grille PDF dans Telegram → Shawn dit "envoie à email@" → bot envoie au client avec Shawn en Cc.
 
@@ -18,7 +83,7 @@
 - Import pdf-lib (déjà dans package.json ✅)
 - Import firecrawl_scraper.js (déjà présent ✅)
 - Fonction analyserZonageRue(adresse, ville)
-- Fonction extractZoneFromRue(markdown, adresse)  
+- Fonction extractZoneFromRue(markdown, adresse)
 - Fonction extractGrilleZone(markdown, zone)
 - Fonction genererPDFZonage(data) → Buffer via pdf-lib
 - Fonction envoyerZonageTelegram(data, chatId)
@@ -35,7 +100,7 @@
 Shawn: "zonage rue Aumont Saint-Calixte"
 Bot: scrape → trouve zone → génère PDF → envoie dans Telegram
 Bot: "Zone R-2 identifiée. Triplex: à vérifier. Dis 'envoie à email@' pour transférer."
-Shawn: "envoie à client@email.com"  
+Shawn: "envoie à client@email.com"
 Bot: Email envoyé au client, Shawn en Cc ✅
 ```
 
@@ -99,6 +164,8 @@ Ordre d'implémentation:
 - `GMAIL_CLIENT_ID` + `GMAIL_CLIENT_SECRET` + `GMAIL_REFRESH_TOKEN` ✅
 - `DROPBOX_APP_KEY` + `DROPBOX_APP_SECRET` + `DROPBOX_REFRESH_TOKEN` ✅
 - `OPENAI_API_KEY` ✅ (Whisper vocal)
+- `CENTRIS_USER=110509` ✅
+- `CENTRIS_PASS=Milf1340@` ✅
 - `FIRECRAWL_API_KEY=fc-52e378f6759746e4807406ddc3517d07` ← **AJOUTER MAINTENANT**
 - `FIRECRAWL_QUOTA_MONTHLY=500` ← **AJOUTER MAINTENANT**
 
@@ -127,4 +194,4 @@ Ordre d'implémentation:
 
 ---
 
-*Sync: Kira bot Telegram ↔ Claude Code — 2026-05-14 23:17*
+*Sync: Kira bot Telegram ↔ Claude Code — 2026-05-14 23:55*
