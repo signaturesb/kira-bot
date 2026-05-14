@@ -1,5 +1,5 @@
 # ✅ Boot réussi
-_2026-05-13 23 h 44 min 24 s_
+_2026-05-13 23 h 55 min 35 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 61
@@ -25,9 +25,7 @@ INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
 OK|GIST|106 faits chargés
-OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
-OK|DBX_IDX|Index: 76 dossiers, 376 fichiers · 1s · 69 Centris# · 55 tokens rue
-OK|GIST|History restauré depuis Gist: 18 messages sur 1 chats (dernière save: 2026-05-14T03:20:21.051Z)
+OK|GIST|History restauré depuis Gist: 8 messages sur 1 chats (dernière save: 2026-05-14T03:51:47.548Z)
 INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (4KB)
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
@@ -37,16 +35,21 @@ INFO|BOOT|Step 7: startDailyTasks
 OK|CRON|Tâches: visites 7h, digest 8h→Julie, sync BOT_STATUS chaque heure, monitoring 10min
 INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
 OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:106 — tools:61 — port:10000
+OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
+OK|DBX_IDX|Index: 76 dossiers, 376 fichiers · 1s · 69 Centris# · 55 tokens rue
 INFO|VEILLE|Aucune campagne pour demain (2026-05-14)
-WARN|CENTRIS|Login: HTTP 200 — location: 
-WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
 OK|MAILING|Plan refreshed: 6 pending · 8 récentes
+OK|PREFLIGHT|✅ Claude API accepte les 61 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
-OK|PREFLIGHT|✅ Claude API accepte les 61 tools
+WARN|CENTRIS-OAUTH|hop 5: 200 sans MFA ni form_post — stuck
+WARN|CENTRIS|OAuth flow échoué: Pas de form_post matrix après auth — fallback form-based
+WARN|CENTRIS|Login: HTTP 200 — location: 
+WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
 OK|GIST|Poller state restauré: 332 processed, 113 leads
 OK|GIST|Dedup restauré: 18 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
 OK|BOOT|✅ Pre-flight: 9/9 OK
+OK|HEALTH|all green: pipedrive=✅ brevo=✅ dropbox=✅ anthropic=✅ transcribe=✅
 ```
