@@ -1,5 +1,5 @@
 # ✅ Boot réussi
-_2026-05-13 22 h 15 min 30 s_
+_2026-05-13 22 h 19 min 28 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 58
@@ -29,7 +29,6 @@ OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
 OK|DBX_IDX|Index: 76 dossiers, 376 fichiers · 1s · 69 Centris# · 55 tokens rue
 OK|GIST|History restauré depuis Gist: 10 messages sur 1 chats (dernière save: 2026-05-13T23:27:19.159Z)
 INFO|BOOT|Step 5: load session live context
-INFO|VEILLE|Aucune campagne pour demain (2026-05-14)
 OK|SYNC|SESSION_LIVE.md chargé (7KB)
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
 OK|BOOT|Gmail Lead Poller + auto-trash CI noise activés
@@ -40,6 +39,7 @@ INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
 OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:172 — tools:58 — port:10000
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
+INFO|VEILLE|Aucune campagne pour demain (2026-05-14)
 OK|MAILING|Plan refreshed: 6 pending · 8 récentes
 OK|PREFLIGHT|✅ Claude API accepte les 58 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
@@ -49,4 +49,5 @@ OK|GIST|Dedup restauré: 18 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
 OK|BOOT|✅ Pre-flight: 8/8 OK
+WARN|SECURITY|SMS bridge bad HMAC from ::ffff:10.27.217.7
 ```
