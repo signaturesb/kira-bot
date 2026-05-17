@@ -1,5 +1,5 @@
 # 🚨 uncaughtException
-_2026-05-17 05 h 20 min 30 s_
+_2026-05-17 05 h 21 min 30 s_
 
 ## Erreur
 ```
@@ -78,7 +78,7 @@ INFO|VEILLE|Aucune campagne pour demain (2026-05-17)
 ## Environnement
 - Node: v22.22.0
 - Platform: linux
-- Memory: {"rss":121733120,"heapTotal":30498816,"heapUsed":25248968,"external":5105190,"arrayBuffers":1467145}
+- Memory: {"rss":121733120,"heapTotal":30498816,"heapUsed":25507792,"external":5375821,"arrayBuffers":1741153}
 - Env vars présents: 144
 
 **Claude Code peut lire ce fichier avec:**
