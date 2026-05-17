@@ -15,7 +15,12 @@
     "doctor": "node scripts/doctor.js",
     "audit-history": "bash scripts/audit-history.sh",
     "test-parser": "node test_parser.js",
-    "preflight": "npm run validate && npm run security-status"
+    "preflight": "npm run validate && npm run security-status",
+    "test-cua": "node test_cua_driver.js",
+    "test-cua:login": "node test_cua_driver.js --login",
+    "test-cua:full": "node test_cua_driver.js --full",
+    "test-cua:diag": "node test_cua_driver.js --diag",
+    "install-playwright": "npx playwright install chromium --with-deps"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.2",
@@ -23,10 +28,16 @@
     "node-telegram-bot-api": "^0.67.0",
     "pdf-lib": "^1.17.1"
   },
+  "optionalDependencies": {
+    "playwright": "^1.44.0"
+  },
   "overrides": {
     "form-data": "^4.0.4",
     "qs": "^6.14.1",
     "tough-cookie": "^4.1.3",
     "uuid": "^14.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
