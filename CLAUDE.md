@@ -1,7 +1,7 @@
 # SIGNATURE SB — Contexte Maître pour Claude Code
 
 > Chargé automatiquement à chaque session. Reprendre ici sans contexte supplémentaire.
-> Dernier commit: 3b10a9e | bot.js: 2996 lignes | 40 outils actifs
+> Dernier commit: cua_driver | bot.js: 2996 lignes | 40 outils actifs
 
 ---
 
@@ -34,7 +34,7 @@ Architecte + développeur principal du bot Telegram. Tutoiement. Français. Touj
 
 ## FONCTIONNALITÉS ACTIVES
 
-### Gmail Lead Poller (NOUVEAU — commit 3b10a9e)
+### Gmail Lead Poller (commit 3b10a9e)
 - Scan toutes les **5 minutes** : Centris.ca, RE/MAX Québec, Realtor.ca, DuProprio, demandes directes
 - `parseLeadEmail()` : extrait nom, tel, email, Centris#, adresse, type — tous formats
 - `traiterNouveauLead()` : deal Pipedrive + docs Dropbox + brouillon J+0 → notif Telegram
@@ -43,8 +43,79 @@ Architecte + développeur principal du bot Telegram. Tutoiement. Français. Touj
 - `/checkemail` : force scan 48h
 - `/poller` : statut + stats
 
+### CUA Driver — Centris PDF via Computer Use (cua_driver.js)
+Résout définitivement le bug "PDF Matrix Centris inaccessible (URLs 2026 changées)".
+
+**Architecture:**
+- Playwright Chromium headless → screenshots → Claude CUA (computer-use-2024-10-22) → actions
+- Boucle: screenshot → Claude décide → click/type/scroll → screenshot → repeat (max 25 steps)
+- Cache session Centris cookies → `/data/cua_session.json` (12h, re-login auto si expiré)
+- Cache PDF → `/data/cua_pdfs/centris_{num}_fiche.pdf` (24h)
+- MFA SMS: lit `/data/centris_mfa.txt` écrit par sms-bridge LaunchAgent (max 90s)
+- Cleanup automatique screenshots + PDFs > 7j
+
+**Installation unique (1 fois sur Render ou Mac):**
+```bash
+npm install playwright
+npx playwright install chromium --with-deps
+```
+
+**API publique:**
+```javascript
+const { cuaGetCentrisPDF, cuaGetCentrisAnnexes, cuaNavigate, cuaStatus, CUA_AVAILABLE } = require('./cua_driver');
+
+// Fiche principale
+const r = await cuaGetCentrisPDF('22264330');
+// → { success, buffer, filename, message, fromCache }
+
+// Annexes (DV, certificat, plans)
+const a = await cuaGetCentrisAnnexes('22264330', 'DV');
+// → { success, annexes: [{buffer, filename}], message }
+
+// Tâche générique
+const g = await cuaNavigate('Trouve le prix de la propriété #12345678', 'https://...');
+
+// Status pour /health
+cuaStatus() → { available, playwright, session, cachedPDFs, maxSteps }
+```
+
+**Intégration dans bot.js (à faire):**
+```javascript
+// En haut de bot.js, après les autres requires:
+const { cuaGetCentrisPDF, cuaGetCentrisAnnexes, CUA_AVAILABLE } = require('./cua_driver');
+
+// Dans telechargerFicheCentris() — ajouter comme stratégie 2 (avant fallback lien public):
+if (CUA_AVAILABLE()) {
+  const cuaResult = await cuaGetCentrisPDF(centrisNum);
+  if (cuaResult.success && cuaResult.buffer) {
+    // Envoyer cuaResult.buffer par email comme PJ
+    return await envoyerPDFParEmail(cuaResult.buffer, cuaResult.filename, emailDest, centrisNum);
+  }
+}
+
+// Dans telechargerAnnexesCentris() — même pattern:
+if (CUA_AVAILABLE()) {
+  const cuaResult = await cuaGetCentrisAnnexes(centrisNum, filtre);
+  if (cuaResult.success) {
+    // cuaResult.annexes[].buffer → envoyer par email
+  }
+}
+
+// Dans /health:
+cua: cuaStatus(),
+```
+
+**Fallback chain complet (après intégration):**
+1. Try URLs Matrix legacy (peut marcher)
+2. **CUA Playwright + Claude Computer Use** ← nouveau
+3. Fallback: email pro avec lien Centris public + photos (déjà en place)
+
+**Env var requise (déjà présente):** `ANTHROPIC_API_KEY`
+**Env vars Centris (déjà présentes):** `CENTRIS_USER`, `CENTRIS_PASS`
+**Nouvelle dépendance:** `playwright` (npm install)
+
 ### 40 Outils Pipedrive (14)
-`voir_pipeline` `chercher_prospect` `voir_prospect_complet` `marquer_perdu` `ajouter_note` `stats_business` `créer_deal` `planifier_visite` `voir_visites` `changer_etape` `voir_activites` `modifier_deal` `creer_activite` `prospects_stagnants`
+`voir_pipeline` `chercher_prospect` `voir_prospect_complet` `marquer_perdu` `ajouter_note` `stats_business` `creer_deal` `planifier_visite` `voir_visites` `changer_etape` `voir_activites` `modifier_deal` `creer_activite` `prospects_stagnants`
 
 ### Gmail (3)
 `voir_emails_recents` `voir_conversation` `envoyer_email`
@@ -88,6 +159,12 @@ Photos (propriétés/terrains/contrats) · PDFs (offres/rapports) · Vocaux Whis
 2. Vérifie taille ≤ 24MB
 3. Gmail avec PJ + note Pipedrive honnête
 
+### Centris PDF (chain complète post-CUA)
+1. Pré-check listing existe (Centris public)
+2. Try URLs Matrix legacy
+3. **CUA: Playwright + Claude Computer Use → PDF réel**
+4. Fallback: email avec lien public Centris.ca
+
 ### Création deal
 1. Cherche personne existante avant créer
 2. Note consolidée (tel + email + source)
@@ -106,6 +183,16 @@ Photos (propriétés/terrains/contrats) · PDFs (offres/rapports) · Vocaux Whis
 - `WEBHOOK_SECRET` : validé sur tous les webhooks
 - `isDuplicate()` : Map FIFO (max 2000 entrées)
 - `executeToolSafe()` : timeout 30s par outil
+
+### CUA Driver (cua_driver.js)
+- Lazy-load Playwright (require.resolve avant require)
+- `CUA_AVAILABLE()` → check sans throw
+- Session cookies 12h → `/data/cua_session.json`
+- PDF cache 24h → `/data/cua_pdfs/`
+- Screenshots debug → `/data/cua_screenshots/`
+- Max 25 steps par tâche (protection boucle infinie)
+- MFA bridge: lit `/data/centris_mfa.txt` (LaunchAgent sms-bridge)
+- Cleanup automatique fichiers > 7j via `cuaCleanup()`
 
 ### `AGENT_CONFIG` — SaaS multi-courtier
 Toutes valeurs courtier en env vars Render. Zero hardcodé.
@@ -154,6 +241,7 @@ GMAIL_CLIENT_ID     GMAIL_CLIENT_SECRET    GMAIL_REFRESH_TOKEN
 DROPBOX_ACCESS_TOKEN DROPBOX_REFRESH_TOKEN DROPBOX_APP_KEY DROPBOX_APP_SECRET
 SHAWN_EMAIL  JULIE_EMAIL  GIST_ID  GITHUB_TOKEN  WEBHOOK_SECRET
 SIRF_USER  SIRF_PASS  (valeurs en env vars — jamais en clair ici)
+CENTRIS_USER  CENTRIS_PASS  (déjà présents)
 ```
 
 **RÈGLE CRITIQUE :** `PUT /services/{id}/env-vars` remplace TOUTES — toujours envoyer la liste complète.
@@ -176,16 +264,93 @@ SIRF_USER  SIRF_PASS  (valeurs en env vars — jamais en clair ici)
 - Bot écrit `BOT_STATUS.md` → GitHub repo `signaturesb/bot-assistant` chaque soir 18h
 - Lire: `read_github_file(repo='bot-assistant', path='BOT_STATUS.md')`
 - Gmail Poller écrit `gmail_poller.json` → `/data/` sur Render
+- SESSION_LIVE.md → kira-bot (Claude Code écrit, bot Telegram lit toutes 30min)
+
+---
+
+## PROCHAINE SESSION — INTÉGRATION CUA DANS bot.js
+
+**cua_driver.js est prêt. Il faut maintenant l'intégrer dans bot.js:**
+
+### Étape 1 — Installer Playwright (1 commande)
+```bash
+cd /Users/signaturesb/Documents/github/Claude,\ code\ Telegram/
+npm install playwright
+npx playwright install chromium --with-deps
+```
+
+### Étape 2 — Require en haut de bot.js (après les autres requires)
+```javascript
+const cuaDriver = (() => {
+  try { return require('./cua_driver'); }
+  catch (e) { console.warn('[CUA] Non disponible:', e.message); return null; }
+})();
+```
+
+### Étape 3 — Modifier telechargerFicheCentris() dans bot.js
+Chercher la fonction `telechargerFicheCentris` (ou `_envoyerListingPubliqueLink`).
+Insérer AVANT le fallback lien public:
+
+```javascript
+// Stratégie 3: CUA Playwright + Claude Computer Use
+if (cuaDriver?.CUA_AVAILABLE()) {
+  try {
+    log('[Centris] Tentative CUA...');
+    const cuaResult = await cuaDriver.cuaGetCentrisPDF(centrisNum);
+    if (cuaResult.success && cuaResult.buffer) {
+      log('[Centris] CUA succès ✅ PDF réel obtenu');
+      return await _envoyerPDFBuffer({
+        buffer: cuaResult.buffer,
+        filename: cuaResult.filename || `Centris_${centrisNum}.pdf`,
+        email: emailDest,
+        centrisNum,
+        messagePers: messagePerso
+      });
+    }
+    log('[Centris] CUA: ' + cuaResult.message + ' → fallback lien public');
+  } catch (e) {
+    log('[Centris] CUA erreur: ' + e.message + ' → fallback');
+  }
+}
+```
+
+### Étape 4 — Modifier telechargerAnnexesCentris() dans bot.js
+Même pattern que fiche principale mais utiliser `cuaDriver.cuaGetCentrisAnnexes(centrisNum, filtre)`.
+
+### Étape 5 — Ajouter cuaStatus() au endpoint /health
+```javascript
+// Dans l'objet health retourné:
+cua: cuaDriver ? cuaDriver.cuaStatus() : { available: false },
+```
+
+### Étape 6 — Cron cleanup hebdo (optionnel)
+```javascript
+// Dans les crons existants, ajouter:
+cron.schedule('0 3 * * 0', () => {  // dimanche 3h
+  if (cuaDriver) {
+    const n = cuaDriver.cuaCleanup();
+    if (n > 0) log(`[CUA] Cleanup: ${n} fichiers supprimés`);
+  }
+});
+```
+
+### Test live après intégration
+```
+Telegram: "Envoie la fiche #22264330 à shawn@signaturesb.com"
+→ doit recevoir PDF réel (pas lien)
+```
 
 ---
 
 ## À IMPLÉMENTER (prochaines sessions)
 
-- [ ] `chercher_comparables` — scraping Centris sold (code dans project_sessions_recentes.md)
+- [x] CUA driver Centris PDF (cua_driver.js) ← FAIT
+- [ ] Intégrer CUA dans bot.js (telechargerFicheCentris + annexes) ← NEXT
+- [ ] npm install playwright + install chromium sur Render
+- [ ] `chercher_comparables` — scraping Centris sold
 - [ ] `comparer_marche` — DuProprio + argument commercial
 - [ ] `registre_foncier` — SIRF + Infolot + APCIQ
 - [ ] Couverture géo 60+ muns (Lanaudière + Montréal + Laval)
-- [ ] `PERPLEXITY_API_KEY` dans Render (recherche web enrichie)
 - [ ] Make.com: pointer webhooks Centris/reply → signaturesb-bot-s272.onrender.com
 - [ ] Réactiver J+1/J+3/J+7 quand Shawn est prêt
 
