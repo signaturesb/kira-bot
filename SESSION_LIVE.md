@@ -1,13 +1,101 @@
 # SESSION_LIVE — Travail Claude Code en temps réel
 
-> Synchronisé via git push vers `kira-bot` repo. Bot Telegram lit ce fichier toutes les 30 min via `loadSessionLiveContext()` (bot.js:10603).
-> Dernière maj: **2026-05-14 05:35 UTC** — Centris fallback lien public
+> Synchronisé via git push vers `kira-bot` repo. Bot Telegram lit ce fichier toutes les 30 min via `loadSessionLiveContext()`.
+> Dernière maj: **2026-05-16 20:10 UTC** — CUA driver livré
 
 ---
 
-## 🎯 Session 2026-05-13/14 — État actuel
+## 🎯 Session 2026-05-16 — CUA DRIVER LIVRÉ
 
-### ✅ DÉPLOYÉS (Render bot-assistant main):
+### ✅ LIVRÉ — `cua_driver.js` (Computer Use Agent)
+
+**Résout définitivement:** Bug PDF Matrix Centris — URLs 2026 inaccessibles via scraping.
+
+**Ce que fait le driver:**
+- Playwright Chromium headless + Claude Computer Use API (`computer-use-2024-10-22`)
+- Boucle: screenshot → Claude voit l'écran → décide action (click/type/scroll) → exécute → repeat
+- Login Centris automatique (Auth0 + MFA SMS bridge)
+- Cache session cookies 12h → `/data/cua_session.json`
+- Cache PDF 24h → `/data/cua_pdfs/`
+- Max 25 steps par tâche, fallback gracieux si Playwright absent
+- Cleanup auto screenshots + PDFs > 7j
+
+**API:**
+```javascript
+const { cuaGetCentrisPDF, cuaGetCentrisAnnexes, cuaNavigate, cuaStatus } = require('./cua_driver');
+const r = await cuaGetCentrisPDF('22264330');   // → { success, buffer, filename }
+const a = await cuaGetCentrisAnnexes('22264330', 'DV'); // → { success, annexes[] }
+```
+
+**Fallback chain après intégration:**
+```
+1. URLs Matrix legacy (peut encore marcher)
+2. CUA: Playwright + Claude voit l'écran → PDF réel ← NOUVEAU
+3. Email lien public Centris (déjà en place)
+```
+
+---
+
+## 🔴 NEXT — Intégration dans bot.js (Claude Code Mac)
+
+**Une session, ~45 min, 6 étapes:**
+
+### Étape 1 — Installer Playwright
+```bash
+cd /Users/signaturesb/Documents/github/Claude,\ code\ Telegram/
+npm install playwright
+npx playwright install chromium --with-deps
+# Vérifier: node -e "require('playwright'); console.log('OK')"
+```
+
+### Étape 2 — Require lazy en haut de bot.js
+```javascript
+// Après les autres requires (~ligne 30):
+const cuaDriver = (() => {
+  try { return require('./cua_driver'); }
+  catch (e) { console.warn('[CUA] Non disponible:', e.message); return null; }
+})();
+```
+
+### Étape 3 — Modifier telechargerFicheCentris()
+Chercher `_envoyerListingPubliqueLink` ou le bloc "Stratégie 3" dans bot.js.
+**Insérer AVANT le fallback lien public:**
+```javascript
+// Stratégie CUA — PDF réel via Computer Use
+if (cuaDriver?.CUA_AVAILABLE()) {
+  try {
+    const cuaResult = await cuaDriver.cuaGetCentrisPDF(centrisNum);
+    if (cuaResult.success && cuaResult.buffer) {
+      return await _envoyerPDFBuffer({
+        buffer: cuaResult.buffer,
+        filename: cuaResult.filename,
+        email: emailDest,
+        centrisNum,
+        messagePers: messagePerso
+      });
+    }
+  } catch (e) { /* fallback lien public */ }
+}
+```
+
+### Étape 4 — Modifier telechargerAnnexesCentris()
+Même pattern: `cuaDriver.cuaGetCentrisAnnexes(centrisNum, filtre)`
+
+### Étape 5 — Ajouter au /health
+```javascript
+cua: cuaDriver ? cuaDriver.cuaStatus() : { available: false },
+```
+
+### Étape 6 — Test live
+```
+Telegram: "Envoie la fiche #22264330 à shawn@signaturesb.com"
+Expected: email reçu avec PDF réel (pas lien public)
+```
+
+---
+
+## ✅ HISTORIQUE DÉPLOYÉS (bot-assistant main)
+
 - `cf83ccf` health check AssemblyAI primaire + OpenAI fallback
 - `5590e87` backup Dropbox auto-refresh + fallback disk
 - `38b8d0c` veille J-1 sur Render 24/7 + boutons inline
@@ -20,47 +108,20 @@
 - `04f92e1` centris-oauth Auth0 new flow identifier/password split + debug
 - `1e4461b` /admin/centris-mfa-code endpoint (Gmail OAuth)
 - `4e558e7` /admin/centris-fetch debug endpoint
+- `f43d845` Centris fallback lien public (email pro stylé)
 
-### ✅ INFRASTRUCTURE Mac autonome:
+## ✅ INFRASTRUCTURE Mac autonome
 - `com.signaturesb.centris-auto-login` LaunchAgent — toutes 12h + boot
-- `com.signaturesb.sms-bridge` LaunchAgent — chat.db poll + clipboard
+- `com.signaturesb.sms-bridge` LaunchAgent — chat.db poll + clipboard → `/data/centris_mfa.txt`
 - Full Disk Access activé pour `/usr/local/bin/node`
 - **28 LaunchAgents signaturesb totaux**
 
-### ✅ FIX 05:35 UTC — `f43d845` Centris fallback lien public
-**Solution pragmatique:** Si PDF Matrix inaccessible, envoie email pro Signature SB avec **lien Centris.ca public** + photos + détails + Cc Shawn auto.
+---
 
-Flow multi-stratégies dans `telechargerFicheCentris`:
-0. **Pré-check** listing existe sur Centris.ca public → si 404, message clair "MLS invalide"
-1-2. Try URLs Matrix legacy (peut encore marcher pour certains)
-3. **Fallback** `_envoyerListingPubliqueLink` — email HTML stylé avec bouton CTA vers fiche publique
+## ✅ Ce qui MARCHE pour Shawn aujourd'hui
 
-**Test possible:** `Envoie #22264330 à client@email.com` → reçoit email pro avec lien fiche complète Centris.ca + photos.
-
-### 🟡 BUG RÉSIDUEL — PDF officiel Matrix (annexes DV, certificat)
-**Description:** `telechargerFicheCentris` utilise `CENTRIS_BASE = 'https://www.centris.ca'` avec URLs `/MX/PrintSheet/{num}` qui sont d'un ancien portail agent.centris.ca retiré.
-
-**Tests faits dans cette session:**
-- ❌ `/Matrix/Public/Portal.aspx?L=1&K=1&p=DE-1-1-XXX` → erreurs
-- ❌ `/Matrix/Listing/XXX`, `/Matrix/Property/XXX` → 404
-- ❌ `/Matrix/Public/Print/XXX` → 404
-- ❌ `https://media.centris.ca/property/XXX/sheet.pdf` → 0 bytes
-
-**Centris a probablement migré les URLs PDF en 2026**. Next iter: explorer Matrix UI manuellement (Playwright) pour trouver le bouton "Print PDF" et capturer son URL réelle via network requests.
-
-### ⚠️ Centris session stability
-Les cookies Matrix expirent ou sont invalidés quand:
-- Login trop rapide successif
-- Plusieurs sessions parallèles
-- Activity sur autre device
-
-Le `centris-auto-login` LaunchAgent refresh toutes les 12h mais sessions peuvent être invalidées entre temps.
-
-### ✅ Ce qui MARCHE pour Shawn aujourd'hui
-
-**Pour SES listings (dans Dropbox `/Terrain en ligne/` ou `/Inscription/`):**
+**Pour SES listings (Dropbox `/Terrain en ligne/` ou `/Inscription/`):**
 - `Envoie tout sur #22264330 à client@email.com` → docs Dropbox + Cc shawn@ auto
-- Idem #10102238, #19070453, #25244988, etc.
 
 **Autres outils 100% fonctionnels:**
 - Pipedrive cleanup, deal creation, activité
@@ -69,21 +130,18 @@ Le `centris-auto-login` LaunchAgent refresh toutes les 12h mais sessions peuvent
 - AssemblyAI transcription (5h/mois gratuit)
 - Gmail email + scraping leads
 
-### 🔬 TODO immédiat next session
-1. **Fix Centris URLs Matrix 2026** — capture flow via Playwright network panel
-2. **Investiguer pourquoi Centris invalide sessions rapides** — peut-être inserer délai 30s entre login attempts
-3. **Test live avec un listing actif** — confirmer que le fix marche
+---
 
-### 📊 Health check actuel
+## 📊 Health check
 ```
 ✅ pipedrive, brevo, dropbox, anthropic, transcribe (assemblyai)
-0 fails — score 100/100
+🟡 cua: not yet integrated in bot.js (cua_driver.js prêt)
 ```
 
 ---
 
-## 📂 Pour ChatGPT/agents externes qui suivent
-- Repo principal: `github.com/signaturesb/kira-bot`
+## 📂 Pour agents externes
+- Repo: `github.com/signaturesb/kira-bot`
 - Bot status: `github.com/signaturesb/bot-assistant/raw/main/BOT_STATUS.md`
 - Health live: `https://signaturesb-bot-s272.onrender.com/admin/health`
 - SESSION_LIVE.md ← ce fichier (kira-bot raw)
