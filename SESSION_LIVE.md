@@ -1,101 +1,135 @@
 # SESSION_LIVE — Travail Claude Code en temps réel
 
-> Synchronisé via git push vers `kira-bot` repo. Bot Telegram lit ce fichier toutes les 30 min via `loadSessionLiveContext()`.
-> Dernière maj: **2026-05-16 20:10 UTC** — CUA driver livré
+> Synchronisé via git push vers `kira-bot` repo. Bot Telegram lit ce fichier toutes les 30 min.
+> Dernière maj: **2026-05-16** — cua_driver v2 livré par bot Telegram
 
 ---
 
-## 🎯 Session 2026-05-16 — CUA DRIVER LIVRÉ
+## 🎯 ÉTAT ACTUEL — cua_driver v2
 
-### ✅ LIVRÉ — `cua_driver.js` (Computer Use Agent)
+### ✅ LIVRÉ PAR BOT TELEGRAM (2026-05-16):
 
-**Résout définitivement:** Bug PDF Matrix Centris — URLs 2026 inaccessibles via scraping.
+**`cua_driver.js` v2 — réécrit complet:**
+- Architecture multi-stratégie: session cache → navigation directe URLs → CUA Claude pilote → screenshot fallback
+- Login Centris Auth0 split-form avec MFA SMS polling `/data/centris_mfa.txt`
+- Session cookies persistée 12h dans `/data/cua_session.json`
+- Intercepteur réseau PDF (capture `content-type: application/pdf` sur tout le context)
+- Boucle CUA avec `claude-haiku-4-5` (rapide + économique vs Opus)
+- Fallback gracieux si Playwright absent: `CUA_AVAILABLE()` → false sans crash
+- `cuaGetCentrisPDF(num)` → Buffer PDF | Buffer PNG (screenshot) | null
+- `cuaGetCentrisAnnexes(num, filtre)` → [{ name, buffer }]
+- `cuaDownloadAndEmail({...})` → interface haut niveau pour bot.js
+- `diagnoseCUA()` → diagnostic complet: deps → env vars → browser launch → login → screenshot
 
-**Ce que fait le driver:**
-- Playwright Chromium headless + Claude Computer Use API (`computer-use-2024-10-22`)
-- Boucle: screenshot → Claude voit l'écran → décide action (click/type/scroll) → exécute → repeat
-- Login Centris automatique (Auth0 + MFA SMS bridge)
-- Cache session cookies 12h → `/data/cua_session.json`
-- Cache PDF 24h → `/data/cua_pdfs/`
-- Max 25 steps par tâche, fallback gracieux si Playwright absent
-- Cleanup auto screenshots + PDFs > 7j
+**`test_cua_driver.js` — suite tests complète:**
+- Unit tests: exports, session mgmt, TTL expiry, fallback sans Playwright
+- Integration: `--login` teste login Centris réel
+- Full: `--full` télécharge PDF #22264330 et valide le buffer
+- Diagnostic: `--diag` lance `diagnoseCUA()`
 
-**API:**
-```javascript
-const { cuaGetCentrisPDF, cuaGetCentrisAnnexes, cuaNavigate, cuaStatus } = require('./cua_driver');
-const r = await cuaGetCentrisPDF('22264330');   // → { success, buffer, filename }
-const a = await cuaGetCentrisAnnexes('22264330', 'DV'); // → { success, annexes[] }
-```
-
-**Fallback chain après intégration:**
-```
-1. URLs Matrix legacy (peut encore marcher)
-2. CUA: Playwright + Claude voit l'écran → PDF réel ← NOUVEAU
-3. Email lien public Centris (déjà en place)
-```
+**`package.json` mis à jour:**
+- `playwright` dans `optionalDependencies` (pas requis sur Render si pas de browser)
+- Scripts: `test-cua`, `test-cua:login`, `test-cua:full`, `test-cua:diag`, `install-playwright`
 
 ---
 
-## 🔴 NEXT — Intégration dans bot.js (Claude Code Mac)
+## 🔴 ACTION REQUISE — Claude Code (toi, sur le Mac)
 
-**Une session, ~45 min, 6 étapes:**
-
-### Étape 1 — Installer Playwright
+### ÉTAPE 1 — Installer Playwright sur le Mac (si pas déjà fait)
 ```bash
 cd /Users/signaturesb/Documents/github/Claude,\ code\ Telegram/
 npm install playwright
 npx playwright install chromium --with-deps
-# Vérifier: node -e "require('playwright'); console.log('OK')"
 ```
 
-### Étape 2 — Require lazy en haut de bot.js
+### ÉTAPE 2 — Copier cua_driver.js + test dans le repo local bot-assistant
+```bash
+# Puller les derniers fichiers depuis kira-bot
+curl -H "Authorization: token $GITHUB_TOKEN" \
+  https://raw.githubusercontent.com/signaturesb/kira-bot/main/cua_driver.js \
+  -o cua_driver.js
+
+curl -H "Authorization: token $GITHUB_TOKEN" \
+  https://raw.githubusercontent.com/signaturesb/kira-bot/main/test_cua_driver.js \
+  -o test_cua_driver.js
+```
+
+### ÉTAPE 3 — Tests unitaires (rapide, sans browser)
+```bash
+node test_cua_driver.js
+# Attendu: tous ✅, 0 ❌
+```
+
+### ÉTAPE 4 — Test diagnostic + login
+```bash
+node test_cua_driver.js --diag
+# Vérifie: deps, env vars, browser launch, login Centris, screenshot
+```
+
+### ÉTAPE 5 — Test complet PDF (listing réel)
+```bash
+node test_cua_driver.js --full
+# Télécharge PDF #22264330, valide buffer, sauvegarde test_output_22264330.pdf
+```
+
+### ÉTAPE 6 — Intégrer dans bot.js (si tests passent)
+
+Dans `bot.js`, remplacer la fonction `telechargerFicheCentris` existante par:
+
 ```javascript
-// Après les autres requires (~ligne 30):
-const cuaDriver = (() => {
+// Au top du fichier, après les requires:
+const { cuaGetCentrisPDF, cuaGetCentrisAnnexes, CUA_AVAILABLE, diagnoseCUA } = (() => {
   try { return require('./cua_driver'); }
-  catch (e) { console.warn('[CUA] Non disponible:', e.message); return null; }
+  catch { return { CUA_AVAILABLE: () => false, cuaGetCentrisPDF: async () => null, cuaGetCentrisAnnexes: async () => [], diagnoseCUA: async () => ({ ok: false, steps: [], error: 'cua_driver absent' }) }; }
 })();
-```
 
-### Étape 3 — Modifier telechargerFicheCentris()
-Chercher `_envoyerListingPubliqueLink` ou le bloc "Stratégie 3" dans bot.js.
-**Insérer AVANT le fallback lien public:**
-```javascript
-// Stratégie CUA — PDF réel via Computer Use
-if (cuaDriver?.CUA_AVAILABLE()) {
-  try {
-    const cuaResult = await cuaDriver.cuaGetCentrisPDF(centrisNum);
-    if (cuaResult.success && cuaResult.buffer) {
-      return await _envoyerPDFBuffer({
-        buffer: cuaResult.buffer,
-        filename: cuaResult.filename,
-        email: emailDest,
-        centrisNum,
-        messagePers: messagePerso
+// Dans telechargerFicheCentris() — remplacer le corps:
+async function telechargerFicheCentris(centrisNum, emailDestination, messagePerso, cc) {
+  const num = String(centrisNum).replace(/\D/g, '');
+
+  // Stratégie 1: CUA si disponible
+  if (CUA_AVAILABLE()) {
+    log('INFO', 'CUA', `Téléchargement PDF ${num} via CUA...`);
+    const pdfBuffer = await cuaGetCentrisPDF(num);
+    if (pdfBuffer) {
+      // Envoyer l'email avec le PDF en PJ
+      return await envoyerEmailAvecPDF({
+        to: emailDestination,
+        subject: `Fiche Centris #${num}`,
+        body: messagePerso || `Bonjour,\n\nVeuillez trouver ci-joint la fiche officielle pour la propriété Centris #${num}.\n\nAu plaisir,\nShawn Barrette`,
+        attachments: [{ name: `fiche_${num}.pdf`, buffer: pdfBuffer }],
+        cc,
       });
     }
-  } catch (e) { /* fallback lien public */ }
+  }
+
+  // Stratégie 2: fallback lien public
+  const publicUrl = `https://www.centris.ca/fr/propriete~${num}`;
+  return await envoyerEmailAvecLienPublic({ emailDestination, centrisNum: num, publicUrl, messagePerso, cc });
 }
 ```
 
-### Étape 4 — Modifier telechargerAnnexesCentris()
-Même pattern: `cuaDriver.cuaGetCentrisAnnexes(centrisNum, filtre)`
-
-### Étape 5 — Ajouter au /health
-```javascript
-cua: cuaDriver ? cuaDriver.cuaStatus() : { available: false },
-```
-
-### Étape 6 — Test live
-```
-Telegram: "Envoie la fiche #22264330 à shawn@signaturesb.com"
-Expected: email reçu avec PDF réel (pas lien public)
+### ÉTAPE 7 — Commit + push + deploy
+```bash
+node --check bot.js  # validation syntaxe
+git add cua_driver.js test_cua_driver.js package.json bot.js
+git commit -m "feat: intégration cua_driver v2 dans bot.js — PDF Centris via Computer Use"
+git push
 ```
 
 ---
 
-## ✅ HISTORIQUE DÉPLOYÉS (bot-assistant main)
+## 📋 RÉSUMÉ PROBLÈME RÉSOLU
 
+**Problème:** `telechargerFicheCentris()` utilisait des URLs Matrix obsolètes → 0 bytes / 404.
+
+**Solution:** Computer Use Agent — Claude pilote Chromium headless, navigue Matrix comme un humain, intercepte le PDF via le réseau.
+
+**Résultat attendu:** `Envoie la fiche #22264330 à client@email.com` → email reçu avec vrai PDF officiel Centris en pièce jointe.
+
+---
+
+## ✅ DÉPLOYÉS PRÉCÉDEMMENT (Render bot-assistant main):
 - `cf83ccf` health check AssemblyAI primaire + OpenAI fallback
 - `5590e87` backup Dropbox auto-refresh + fallback disk
 - `38b8d0c` veille J-1 sur Render 24/7 + boutons inline
@@ -108,40 +142,4 @@ Expected: email reçu avec PDF réel (pas lien public)
 - `04f92e1` centris-oauth Auth0 new flow identifier/password split + debug
 - `1e4461b` /admin/centris-mfa-code endpoint (Gmail OAuth)
 - `4e558e7` /admin/centris-fetch debug endpoint
-- `f43d845` Centris fallback lien public (email pro stylé)
-
-## ✅ INFRASTRUCTURE Mac autonome
-- `com.signaturesb.centris-auto-login` LaunchAgent — toutes 12h + boot
-- `com.signaturesb.sms-bridge` LaunchAgent — chat.db poll + clipboard → `/data/centris_mfa.txt`
-- Full Disk Access activé pour `/usr/local/bin/node`
-- **28 LaunchAgents signaturesb totaux**
-
----
-
-## ✅ Ce qui MARCHE pour Shawn aujourd'hui
-
-**Pour SES listings (Dropbox `/Terrain en ligne/` ou `/Inscription/`):**
-- `Envoie tout sur #22264330 à client@email.com` → docs Dropbox + Cc shawn@ auto
-
-**Autres outils 100% fonctionnels:**
-- Pipedrive cleanup, deal creation, activité
-- Brevo campaigns + veille J-1 + Cc Shawn auto
-- Firecrawl zonage municipal (clé fc-5...7d07 active)
-- AssemblyAI transcription (5h/mois gratuit)
-- Gmail email + scraping leads
-
----
-
-## 📊 Health check
-```
-✅ pipedrive, brevo, dropbox, anthropic, transcribe (assemblyai)
-🟡 cua: not yet integrated in bot.js (cua_driver.js prêt)
-```
-
----
-
-## 📂 Pour agents externes
-- Repo: `github.com/signaturesb/kira-bot`
-- Bot status: `github.com/signaturesb/bot-assistant/raw/main/BOT_STATUS.md`
-- Health live: `https://signaturesb-bot-s272.onrender.com/admin/health`
-- SESSION_LIVE.md ← ce fichier (kira-bot raw)
+- `f43d845` Centris fallback lien public (fix temporaire — remplacé par cua_driver v2)
