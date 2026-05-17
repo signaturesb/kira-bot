@@ -1,11 +1,11 @@
 # 🚨 uncaughtException
-_2026-05-16 21 h 59 min 29 s_
+_2026-05-17 05 h 00 min 30 s_
 
 ## Erreur
 ```
 m is not defined
 ReferenceError: m is not defined
-    at Timeout._onTimeout (/opt/render/project/src/bot.js:11280:43)
+    at Timeout._onTimeout (/opt/render/project/src/bot.js:11262:20)
     at listOnTimeout (node:internal/timers:588:17)
     at process.processTimers (node:internal/timers:523:7)
 ```
@@ -78,7 +78,7 @@ INFO|VEILLE|Aucune campagne pour demain (2026-05-17)
 ## Environnement
 - Node: v22.22.0
 - Platform: linux
-- Memory: {"rss":115847168,"heapTotal":28401664,"heapUsed":22517400,"external":4103616,"arrayBuffers":465571}
+- Memory: {"rss":121499648,"heapTotal":30498816,"heapUsed":27214008,"external":7323927,"arrayBuffers":3685882}
 - Env vars présents: 144
 
 **Claude Code peut lire ce fichier avec:**
