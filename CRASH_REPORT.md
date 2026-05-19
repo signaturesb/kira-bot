@@ -1,5 +1,5 @@
 # 🚨 uncaughtException
-_2026-05-19 05 h 55 min 15 s_
+_2026-05-19 05 h 56 min 15 s_
 
 ## Erreur
 ```
@@ -76,7 +76,7 @@ INFO|VEILLE|veille_35_2026-05-19 déjà fait (Mac scheduler probablement)
 ## Environnement
 - Node: v22.22.0
 - Platform: linux
-- Memory: {"rss":123047936,"heapTotal":31547392,"heapUsed":27836552,"external":6609030,"arrayBuffers":2970985}
+- Memory: {"rss":123047936,"heapTotal":31809536,"heapUsed":23519728,"external":3902822,"arrayBuffers":264777}
 - Env vars présents: 144
 
 **Claude Code peut lire ce fichier avec:**
