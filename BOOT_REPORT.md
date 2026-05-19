@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-05-19 18 h 12 min 24 s_
+_2026-05-19 18 h 22 min 14 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 61
-- Uptime: 19s
+- Uptime: 18s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -23,10 +23,10 @@ INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
 OK|GIST|195 faits chargés
-OK|GIST|History restauré depuis Gist: 1 messages sur 1 chats (dernière save: 2026-05-19T22:01:18.719Z)
-INFO|BOOT|Step 5: load session live context
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
 OK|DBX_IDX|Index: 83 dossiers, 400 fichiers · 1s · 76 Centris# · 57 tokens rue
+OK|GIST|History restauré depuis Gist: 1 messages sur 1 chats (dernière save: 2026-05-19T22:01:18.719Z)
+INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (6KB)
 INFO|BOOT|Step 5b: pre-warm master email template
 OK|MAILING|Plan refreshed: 6 pending · 8 récentes
@@ -44,13 +44,13 @@ INFO|CENTRIS-OAUTH|hop 0 302 → location: https://centris-prod.ca.auth0.com/aut
 INFO|CENTRIS-OAUTH|hop 1 → https://centris-prod.ca.auth0.com/authorize?client_id=x7YZXkUKRSCWB0X4hg0TT9oLw6fDw1W1&redirect_uri=https%3A%2F%2Faccoun
 INFO|CENTRIS-OAUTH|hop 1 302 → location: https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
 INFO|CENTRIS-OAUTH|hop 2 → https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
-INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=qRuQ4bnCnfTocWxu3sITXVXdnISnqG7zGScibMSHVtM&state=Pqjg4zyh8w_j6wFj
-INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=qRuQ4bnCnfTocWxu3sITXVXdnISnqG7zGScibMSHVtM&state=Pqjg4zyh8w_j6wFj
-INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=IjYSm8zb8akCH5kh79vZgatz55G7fjZc
-INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=IjYSm8zb8akCH5kh79vZgatz55G7fjZc
-INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SBQSWVjUEpqb1c1MnBGQ3FlRENzaW83ZnRXTTBQZ2o3a6FusG1mYS1hdXRoZW50aWNhdGWjdGlk2SBJallTbTh6Y
-INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBQSWVjUEpqb1c1MnBGQ3FlRENzaW83ZnRXTTBQZ2o3a6FusG1mYS1h
-WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBQSWVjUEpqb1c1 — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
+INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=ftGsNW2ja4vf2XoHxxCL2zFs8oEzfzVetXe5J3PzV7s&state=Nwk6jCL_6Lk6Ouxf
+INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=ftGsNW2ja4vf2XoHxxCL2zFs8oEzfzVetXe5J3PzV7s&state=Nwk6jCL_6Lk6Ouxf
+INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=-gsqtmQFK3wbRw0fN4MFIS0taVDKp9fn
+INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=-gsqtmQFK3wbRw0fN4MFIS0taVDKp9fn
+INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SBxTzZwZlpZdS1td3NEWDBtUEk4TzI5M1A5VzZxSERTLaFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SAtZ3NxdG1RR
+INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBxTzZwZlpZdS1td3NEWDBtUEk4TzI5M1A5VzZxSERTLaFusG1mYS1h
+WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBxTzZwZlpZdS1t — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
 WARN|CENTRIS|OAuth flow échoué: Pas de form_post matrix après auth — fallback form-based
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
@@ -62,4 +62,5 @@ OK|GIST|Dedup restauré: 22 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
 OK|BOOT|✅ Pre-flight: 9/9 OK
+OK|HEALTH|all green: pipedrive=✅ brevo=✅ dropbox=✅ anthropic=✅ transcribe=✅
 ```
