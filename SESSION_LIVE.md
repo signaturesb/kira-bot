@@ -1,133 +1,130 @@
 # SESSION_LIVE — Travail Claude Code en temps réel
 
 > Synchronisé via git push vers `kira-bot` repo. Bot Telegram lit ce fichier toutes les 30 min.
-> Dernière maj: **2026-05-16** — cua_driver v2 livré par bot Telegram
+> Dernière maj: **2026-05-19** — Fix prioritaire email terrains
 
 ---
 
-## 🎯 ÉTAT ACTUEL — cua_driver v2
+## 🚨 PRIORITÉ ABSOLUE — 3 FIXES EMAIL TERRAINS
 
-### ✅ LIVRÉ PAR BOT TELEGRAM (2026-05-16):
-
-**`cua_driver.js` v2 — réécrit complet:**
-- Architecture multi-stratégie: session cache → navigation directe URLs → CUA Claude pilote → screenshot fallback
-- Login Centris Auth0 split-form avec MFA SMS polling `/data/centris_mfa.txt`
-- Session cookies persistée 12h dans `/data/cua_session.json`
-- Intercepteur réseau PDF (capture `content-type: application/pdf` sur tout le context)
-- Boucle CUA avec `claude-haiku-4-5` (rapide + économique vs Opus)
-- Fallback gracieux si Playwright absent: `CUA_AVAILABLE()` → false sans crash
-- `cuaGetCentrisPDF(num)` → Buffer PDF | Buffer PNG (screenshot) | null
-- `cuaGetCentrisAnnexes(num, filtre)` → [{ name, buffer }]
-- `cuaDownloadAndEmail({...})` → interface haut niveau pour bot.js
-- `diagnoseCUA()` → diagnostic complet: deps → env vars → browser launch → login → screenshot
-
-**`test_cua_driver.js` — suite tests complète:**
-- Unit tests: exports, session mgmt, TTL expiry, fallback sans Playwright
-- Integration: `--login` teste login Centris réel
-- Full: `--full` télécharge PDF #22264330 et valide le buffer
-- Diagnostic: `--diag` lance `diagnoseCUA()`
-
-**`package.json` mis à jour:**
-- `playwright` dans `optionalDependencies` (pas requis sur Render si pas de browser)
-- Scripts: `test-cua`, `test-cua:login`, `test-cua:full`, `test-cua:diag`, `install-playwright`
+Shawn a répété ces règles des dizaines de fois. Elles doivent être **codées dans bot.js**, pas dans la mémoire du bot qui repart à zéro à chaque session.
 
 ---
 
-## 🔴 ACTION REQUISE — Claude Code (toi, sur le Mac)
+### FIX 1 — CC AUTOMATIQUE SHAWN (non-négociable)
 
-### ÉTAPE 1 — Installer Playwright sur le Mac (si pas déjà fait)
-```bash
-cd /Users/signaturesb/Documents/github/Claude,\ code\ Telegram/
-npm install playwright
-npx playwright install chromium --with-deps
+**Problème:** `shawn@signaturesb.com` n'est pas toujours en Cc sur les emails envoyés aux clients/prospects.
+
+**Règle absolue:** Tout email envoyé par le bot → `shawn@signaturesb.com` en **Cc visible** (pas Bcc).
+
+**Dans bot.js — chercher TOUTES les fonctions d'envoi email:**
+- `sendEmailWithTemplate()`
+- `envoierEmail()` / `envoyerEmail()`
+- `envoierDocsProspect()`
+- `envoyerRapportComparables()`
+- `sendTerrainsList()`
+- **Toute autre fonction qui appelle Gmail API ou Nodemailer**
+
+**Pour chaque fonction, s'assurer que:**
+```javascript
+// cc doit TOUJOURS inclure shawn@signaturesb.com
+const ccFinal = ['shawn@signaturesb.com', ...(cc ? cc.split(',').map(e => e.trim()) : [])];
 ```
 
-### ÉTAPE 2 — Copier cua_driver.js + test dans le repo local bot-assistant
-```bash
-# Puller les derniers fichiers depuis kira-bot
-curl -H "Authorization: token $GITHUB_TOKEN" \
-  https://raw.githubusercontent.com/signaturesb/kira-bot/main/cua_driver.js \
-  -o cua_driver.js
+**Tester:** Envoyer un email test à `test@test.com` → vérifier que `shawn@signaturesb.com` reçoit la copie.
 
-curl -H "Authorization: token $GITHUB_TOKEN" \
-  https://raw.githubusercontent.com/signaturesb/kira-bot/main/test_cua_driver.js \
-  -o test_cua_driver.js
+---
+
+### FIX 2 — PREVIEW OBLIGATOIRE AVANT TOUT ENVOI
+
+**Problème:** Le bot envoie parfois des emails sans montrer le contenu à Shawn d'abord.
+
+**Règle absolue:** Pour tout email à un prospect/client:
+1. Afficher le brouillon complet (destinataire, sujet, corps, Cc)
+2. Attendre confirmation: `"envoie"`, `"go"`, `"ok"`, `"parfait"`, `"send"`, `"oui"`
+3. **Seulement alors** envoyer
+
+**Exception:** Les emails auto-générés par le lead poller (leads entrants Centris) peuvent être envoyés automatiquement SI le score de match est ≥90.
+
+**Dans bot.js — ajouter flag `requiresConfirmation: true`** sur tous les envois manuels initiés par Shawn via Telegram.
+
+---
+
+### FIX 3 — TEMPLATE EMAIL TERRAINS (Brevo ID 43)
+
+**Problème:** Le bot improvise le template email terrains au lieu d'utiliser le template officiel.
+
+**Règle absolue:** Tout email de liste terrains doit utiliser:
+- **Brevo template ID 43** comme base (fond `#0a0a0a`, rouge `#aa0721`, logos RE/MAX + Signature SB base64)
+- **JAMAIS** inclure le site `terrainspretsaconstruire.com` dans le contenu
+- **Toujours** inclure la promo ProFab (0$ comptant via Desjardins)
+
+**Format liste terrains (dans le template):**
+```
+Adresse — Centris #XXXXXXXX — Prix — Superficie
+```
+Groupés par secteur (Rawdon, Sainte-Julienne, Chertsey, etc.)
+
+**Paramètres Brevo template 43:**
+```javascript
+const params = {
+  TITRE_EMAIL: "Terrains disponibles Lanaudière — [Mois Année]",
+  HERO_TITRE: "Vos terrains disponibles",
+  INTRO_TEXTE: "Bonjour, voici notre sélection de terrains disponibles...",
+  TABLEAU_STATS_HTML: "<!-- liste terrains groupés par secteur -->",
+  CONTENU_STRATEGIE: "<!-- promo ProFab -->",
+  CTA_TITRE: "Prendre rendez-vous",
+  CTA_URL: "tel:5149271340",
+  CTA_BOUTON: "📞 514-927-1340",
+};
 ```
 
-### ÉTAPE 3 — Tests unitaires (rapide, sans browser)
-```bash
-node test_cua_driver.js
-# Attendu: tous ✅, 0 ❌
+**Charger le template depuis Brevo API:**
+```javascript
+const template = await brevo.getSmtpTemplate(43);
+// Injecter les params avant envoi
 ```
 
-### ÉTAPE 4 — Test diagnostic + login
-```bash
-node test_cua_driver.js --diag
-# Vérifie: deps, env vars, browser launch, login Centris, screenshot
-```
+---
 
-### ÉTAPE 5 — Test complet PDF (listing réel)
-```bash
-node test_cua_driver.js --full
-# Télécharge PDF #22264330, valide buffer, sauvegarde test_output_22264330.pdf
-```
+### FIX 4 — SAUVEGARDER CONTENU EMAIL DANS PIPEDRIVE
 
-### ÉTAPE 6 — Intégrer dans bot.js (si tests passent)
+**Problème:** Shawn ne peut pas retrouver le contenu exact d'un email envoyé.
 
-Dans `bot.js`, remplacer la fonction `telechargerFicheCentris` existante par:
+**Règle:** Après chaque envoi email à un prospect:
+1. Chercher le deal dans Pipedrive (par email ou nom)
+2. Ajouter une note avec:
+   - Date/heure envoi
+   - Destinataire
+   - Sujet
+   - **Corps complet de l'email**
 
 ```javascript
-// Au top du fichier, après les requires:
-const { cuaGetCentrisPDF, cuaGetCentrisAnnexes, CUA_AVAILABLE, diagnoseCUA } = (() => {
-  try { return require('./cua_driver'); }
-  catch { return { CUA_AVAILABLE: () => false, cuaGetCentrisPDF: async () => null, cuaGetCentrisAnnexes: async () => [], diagnoseCUA: async () => ({ ok: false, steps: [], error: 'cua_driver absent' }) }; }
-})();
-
-// Dans telechargerFicheCentris() — remplacer le corps:
-async function telechargerFicheCentris(centrisNum, emailDestination, messagePerso, cc) {
-  const num = String(centrisNum).replace(/\D/g, '');
-
-  // Stratégie 1: CUA si disponible
-  if (CUA_AVAILABLE()) {
-    log('INFO', 'CUA', `Téléchargement PDF ${num} via CUA...`);
-    const pdfBuffer = await cuaGetCentrisPDF(num);
-    if (pdfBuffer) {
-      // Envoyer l'email avec le PDF en PJ
-      return await envoyerEmailAvecPDF({
-        to: emailDestination,
-        subject: `Fiche Centris #${num}`,
-        body: messagePerso || `Bonjour,\n\nVeuillez trouver ci-joint la fiche officielle pour la propriété Centris #${num}.\n\nAu plaisir,\nShawn Barrette`,
-        attachments: [{ name: `fiche_${num}.pdf`, buffer: pdfBuffer }],
-        cc,
-      });
-    }
-  }
-
-  // Stratégie 2: fallback lien public
-  const publicUrl = `https://www.centris.ca/fr/propriete~${num}`;
-  return await envoyerEmailAvecLienPublic({ emailDestination, centrisNum: num, publicUrl, messagePerso, cc });
-}
-```
-
-### ÉTAPE 7 — Commit + push + deploy
-```bash
-node --check bot.js  # validation syntaxe
-git add cua_driver.js test_cua_driver.js package.json bot.js
-git commit -m "feat: intégration cua_driver v2 dans bot.js — PDF Centris via Computer Use"
-git push
+await ajouterNote(dealId, `📧 Email envoyé le ${new Date().toLocaleString('fr-CA')}
+À: ${to}
+Sujet: ${sujet}
+---
+${corps}`);
 ```
 
 ---
 
-## 📋 RÉSUMÉ PROBLÈME RÉSOLU
+## ORDRE D'EXÉCUTION
 
-**Problème:** `telechargerFicheCentris()` utilisait des URLs Matrix obsolètes → 0 bytes / 404.
+1. **Fix 1 (Cc auto)** — 10 min — critique, faire EN PREMIER
+2. **Fix 2 (Preview)** — déjà partiellement en place, vérifier et renforcer
+3. **Fix 4 (Note Pipedrive)** — 15 min — important pour traçabilité
+4. **Fix 3 (Template Brevo 43)** — 30 min — nécessite test envoi réel
 
-**Solution:** Computer Use Agent — Claude pilote Chromium headless, navigue Matrix comme un humain, intercepte le PDF via le réseau.
+**Après chaque fix:** commit individuel avec message clair + push + vérifier sur Render.
 
-**Résultat attendu:** `Envoie la fiche #22264330 à client@email.com` → email reçu avec vrai PDF officiel Centris en pièce jointe.
+**Test final:** Shawn demande `"envoie liste terrains à test@test.com"` → bot affiche preview → Shawn dit `"envoie"` → email reçu avec bon template + Shawn en Cc + note Pipedrive créée.
 
 ---
+
+## 🎯 ÉTAT PRÉCÉDENT — cua_driver v2 (2026-05-16)
+
+> ✅ Livré — voir historique git pour détails. Playwright à installer sur Mac.
 
 ## ✅ DÉPLOYÉS PRÉCÉDEMMENT (Render bot-assistant main):
 - `cf83ccf` health check AssemblyAI primaire + OpenAI fallback
@@ -139,7 +136,3 @@ git push
 - `2e66aa5` Dropbox uploadDropboxSecret auto-refresh 401
 - `7d4380a` centrisLogin() utilise OAuth Auth0 + MFA SMS
 - `59a887a` AssemblyAI primaire + Whisper fallback transcription
-- `04f92e1` centris-oauth Auth0 new flow identifier/password split + debug
-- `1e4461b` /admin/centris-mfa-code endpoint (Gmail OAuth)
-- `4e558e7` /admin/centris-fetch debug endpoint
-- `f43d845` Centris fallback lien public (fix temporaire — remplacé par cua_driver v2)
