@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-05-19 17 h 48 min 54 s_
+_2026-05-19 17 h 52 min 10 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 61
-- Uptime: 19s
+- Uptime: 18s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -25,7 +25,6 @@ INFO|BOOT|Step 4: load memory + history
 OK|GIST|195 faits chargés
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
 OK|DBX_IDX|Index: 76 dossiers, 376 fichiers · 1s · 69 Centris# · 55 tokens rue
-OK|MAILING|Plan refreshed: 6 pending · 8 récentes
 OK|GIST|History restauré depuis Gist: 48 messages sur 1 chats (dernière save: 2026-05-19T20:06:56.481Z)
 INFO|BOOT|Step 5: load session live context
 OK|SYNC|SESSION_LIVE.md chargé (6KB)
@@ -39,18 +38,19 @@ INFO|BOOT|Step 7: startDailyTasks
 OK|CRON|Tâches: visites 7h, digest 8h→Julie, sync BOT_STATUS chaque heure, monitoring 10min
 INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
 OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:195 — tools:61 — port:10000
+OK|MAILING|Plan refreshed: 6 pending · 8 récentes
 INFO|CENTRIS-OAUTH|hop 0 → https://accounts.centris.ca/connect/authorize?client_id=00DB706E-3B35-4CCA-8915-57DD3E1633E8&redirect_uri=https://matrix
 INFO|CENTRIS-OAUTH|hop 0 302 → location: https://centris-prod.ca.auth0.com/authorize?client_id=x7YZXkUKRSCWB0X4hg0TT9oLw6fDw1W1&redirect_uri=https%3A%2F%2Faccoun
 INFO|CENTRIS-OAUTH|hop 1 → https://centris-prod.ca.auth0.com/authorize?client_id=x7YZXkUKRSCWB0X4hg0TT9oLw6fDw1W1&redirect_uri=https%3A%2F%2Faccoun
 INFO|CENTRIS-OAUTH|hop 1 302 → location: https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
 INFO|CENTRIS-OAUTH|hop 2 → https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
-INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=XcejBWwTM4T4qhMnHKVKTOA4ojvnlxhlp4-xq4O25Nc&state=zLhHo_6GKeZLnWK7
-INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=XcejBWwTM4T4qhMnHKVKTOA4ojvnlxhlp4-xq4O25Nc&state=zLhHo_6GKeZLnWK7
-INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=P66b1NBvGuooZRuPPb1HFLazecl-X7qX
-INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=P66b1NBvGuooZRuPPb1HFLazecl-X7qX
-INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SAxb0NQQUo2bU5qSnFNQ3JmNVlhZzJvM256R3JPZ2kyR6FusG1mYS1hdXRoZW50aWNhdGWjdGlk2SBQNjZiMU5Cd
-INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SAxb0NQQUo2bU5qSnFNQ3JmNVlhZzJvM256R3JPZ2kyR6FusG1mYS1h
-WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SAxb0NQQUo2bU5q — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
+INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=2kfvWNqt5q7sP5IEIz4_J1sLiOX_k1MDaLPh9Bzmt84&state=ZZrXU-v27HLB5_Zi
+INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=2kfvWNqt5q7sP5IEIz4_J1sLiOX_k1MDaLPh9Bzmt84&state=ZZrXU-v27HLB5_Zi
+INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=4orsd7YPB_VBFj0hCnhifE-i_4WEFI8T
+INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=4orsd7YPB_VBFj0hCnhifE-i_4WEFI8T
+INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SBRUlp3WmFLSkdodGwxRTFfNGRIUWZ1NDNWUE9yamRZYaFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SA0b3JzZDdZU
+INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBRUlp3WmFLSkdodGwxRTFfNGRIUWZ1NDNWUE9yamRZYaFusG1mYS1h
+WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBRUlp3WmFLSkdo — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
 WARN|CENTRIS|OAuth flow échoué: Pas de form_post matrix après auth — fallback form-based
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
@@ -61,11 +61,4 @@ OK|GIST|Poller state restauré: 399 processed, 124 leads
 OK|GIST|Dedup restauré: 22 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
-INFO|POLLER|Regex 3/5 infos — AI deep scrape (sonnet tool-use) pour "L’inscription pour l’adresse Ch. de l'Église, #377"
-OK|AI_PARSER|Extracted (sonnet tool-use): nom=false tel=true email=false centris=true adresse=true conf={"nom":0,"telephone":0,"email":0,"centris":95,"adresse":90}
-INFO|DEDUP|Lead match: t:5149271340 (vu 296min ago)
-INFO|POLLER|Dédup 7j: lead 5149271340 déjà notifié — skip
-INFO|AUDIT|lead/dedup_skipped {"msgId":"19e42353ee82d708","at":"2026-05-19T21:48:50.899Z","source":"Realtor.ca","subject":"L’inscr
-INFO|POLLER|Regex 3/5 infos — AI deep scrape (sonnet tool-use) pour "L’inscription pour l’adresse Ch. de l'Église, #376"
-OK|BOOT|✅ Pre-flight: 9/9 OK
 ```
