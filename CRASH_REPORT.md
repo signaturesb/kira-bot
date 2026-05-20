@@ -1,5 +1,5 @@
 # 🚨 uncaughtException
-_2026-05-20 05 h 41 min 54 s_
+_2026-05-20 05 h 42 min 54 s_
 
 ## Erreur
 ```
@@ -81,7 +81,7 @@ OK|HEALTH|all green: pipedrive=✅ brevo=✅ dropbox=✅ anthropic=✅ transcrib
 ## Environnement
 - Node: v22.22.0
 - Platform: linux
-- Memory: {"rss":121323520,"heapTotal":30691328,"heapUsed":24340912,"external":4769826,"arrayBuffers":1091773}
+- Memory: {"rss":121323520,"heapTotal":30691328,"heapUsed":24696672,"external":5198940,"arrayBuffers":1521296}
 - Env vars présents: 145
 
 **Claude Code peut lire ce fichier avec:**
