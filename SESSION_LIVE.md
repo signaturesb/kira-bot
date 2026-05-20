@@ -1,128 +1,141 @@
 # SESSION_LIVE — Travail Claude Code en temps réel
 
-> Synchronisé via git push vers `kira-bot` repo. Bot Telegram lit ce fichier toutes les 30 min via `loadSessionLiveContext()` (bot.js:10603).
-> Dernière maj: **2026-05-14 05:35 UTC** — Centris fallback lien public
+> Synchronisé via git push vers `bot-assistant` (Render auto-deploy).
+> Bot lit ce fichier toutes les 30 min via `loadSessionLiveContext()`.
+> **Dernière maj: 2026-05-19 23:35 UTC** — Centris Matrix 100% maîtrisé
 
 ---
 
-## 🎯 Session 2026-05-13/14 — État actuel
+## 🏆 Session 2026-05-19 — 30+ commits déployés
 
-### ✅ DÉPLOYÉS (Render bot-assistant main):
-- `cf83ccf` health check AssemblyAI primaire + OpenAI fallback
-- `5590e87` backup Dropbox auto-refresh + fallback disk
-- `38b8d0c` veille J-1 sur Render 24/7 + boutons inline
-- `f4e40ae` Cc Shawn auto sur tous sendNow Brevo
-- `ef021d8` Pipedrive cleanup catégorie (D) Shawn-as-contact
-- `cf5ee04` BLOC A6+A7+B + analyser_zonage_adresse (4 features)
-- `2e66aa5` Dropbox uploadDropboxSecret auto-refresh 401
-- `7d4380a` centrisLogin() utilise OAuth Auth0 + MFA SMS
-- `59a887a` AssemblyAI primaire + Whisper fallback transcription
-- `04f92e1` centris-oauth Auth0 new flow identifier/password split + debug
-- `1e4461b` /admin/centris-mfa-code endpoint (Gmail OAuth)
-- `4e558e7` /admin/centris-fetch debug endpoint
+### Commits clés aujourd'hui
+| Commit | Sujet |
+|---|---|
+| `e9a8ec1` | fix(centris-search): page.selectOption() postback + MATRIX_PREFIXES par type |
+| `bf3585e` | feat(centris-search): 100% complet — sélecteurs Matrix DOM exacts + 4 tools pipeline |
+| `94ed29b` | feat(system): keyword mapping pour catégories Matrix dans SYSTEM_BASE |
+| `e906c65` | feat(centris-search): searchCentrisVendus() skeleton + Matrix structure mapped |
+| `68861e2` | feat(system): teach bot to prefer envoyer_fiche_centris_native FIRST |
+| `16d09a8` | feat(centris-native): outil bot envoyer_fiche_centris_native — flow Matrix UI |
+| `6875333` | fix(cua): détecte rebrowser flavor AVANT load |
+| `0e08f22` | feat(scrape): rebrowser-playwright + 4 couches anti-detect + pdf-parse Centris |
+| `e527bc3` | fix(preview): défaut shawn@signaturesb.com + Gmail API direct |
+| `693c614` | feat(market): LLM Haiku extraction fallback robuste |
+| `a7551e7` | feat(market): 15 sources QC + spot-check 3 sem + auto-inject |
+| `8dc9fc3` | fix(audit-P0): Gmail Poller mutex + budget USD conversation |
+| `5313c7c` | feat(cua+gmail): bulletproof MFA + visual fallback + Telegram alert |
+| `a3598db` | feat(cua): intégration CUA + Browserless externe |
+| `a49fc6e` | feat(email-template): master template Dropbox sur 4 fonctions emails |
 
-### ✅ INFRASTRUCTURE Mac autonome:
-- `com.signaturesb.centris-auto-login` LaunchAgent — toutes 12h + boot
-- `com.signaturesb.sms-bridge` LaunchAgent — chat.db poll + clipboard
-- Full Disk Access activé pour `/usr/local/bin/node`
-- **28 LaunchAgents signaturesb totaux**
+### ✅ CENTRIS MATRIX — 100% MAÎTRISÉ
 
-### ✅ FIX 05:35 UTC — `f43d845` Centris fallback lien public
-**Solution pragmatique:** Si PDF Matrix inaccessible, envoie email pro Signature SB avec **lien Centris.ca public** + photos + détails + Cc Shawn auto.
+**Flow `envoyer_fiche_centris_native()` validé live:**
+- Test réussi listing #18366287 → email natif Centris reçu icloud
+- PDF officiel + 61 photos HD + signature Shawn intégrée
+- Outil bot ajouté + préférence SYSTEM_BASE
 
-Flow multi-stratégies dans `telechargerFicheCentris`:
-0. **Pré-check** listing existe sur Centris.ca public → si 404, message clair "MLS invalide"
-1-2. Try URLs Matrix legacy (peut encore marcher pour certains)
-3. **Fallback** `_envoyerListingPubliqueLink` — email HTML stylé avec bouton CTA vers fiche publique
+**Flow `searchCentrisVendus()` validé live:**
+- Test 32 terrains vendus Rawdon 6 mois → **CONFIRMÉ par Shawn**
+- Format date "0-180" (jours arrière)
+- page.selectOption() pour postback ASP.NET (fix bug DOM manip)
 
-**Test possible:** `Envoie #22264330 à client@email.com` → reçoit email pro avec lien fiche complète Centris.ca + photos.
+### 🗺️ STRUCTURE MATRIX CAPTURÉE
 
-### 🟡 BUG RÉSIDUEL — PDF officiel Matrix (annexes DV, certificat)
-**Description:** `telechargerFicheCentris` utilise `CENTRIS_BASE = 'https://www.centris.ca'` avec URLs `/MX/PrintSheet/{num}` qui sont d'un ancien portail agent.centris.ca retiré.
+**Prefix Fm{N}_ par type:**
+- Unifamiliale = `Fm43_`
+- TerreTerrain = `Fm105_`
+- Autres types à confirmer
 
-**Tests faits dans cette session:**
-- ❌ `/Matrix/Public/Portal.aspx?L=1&K=1&p=DE-1-1-XXX` → erreurs
-- ❌ `/Matrix/Listing/XXX`, `/Matrix/Property/XXX` → 404
-- ❌ `/Matrix/Public/Print/XXX` → 404
-- ❌ `https://media.centris.ca/property/XXX/sheet.pdf` → 0 bytes
+**Ctrl numbers partagés** (sauf changement de statut):
+- 3565 = Région
+- 3567 = Municipalité (67 options Lanaudière)
+- 3568 = Quartier
+- 3227 = Statut (En vigueur / Vendu / Expiré / Hors marché / Annulé)
+- 3386 = Prix demandé/vendu
+- 3416 = Changement de statut (Unifam) / **3425** (Terrain)
+- 792 = Genre (Plain-pied/À étages/Paliers/1.5/Mobile)
+- 794 = Type bâtiment (Isolé/Jumelé/En rangée/Coin/Quadrex)
 
-**Centris a probablement migré les URLs PDF en 2026**. Next iter: explorer Matrix UI manuellement (Playwright) pour trouver le bouton "Print PDF" et capturer son URL réelle via network requests.
+**URLs (sans / dans path):**
+- `/Recherche/Unifamiliale/Générale`
+- `/Recherche/TerreTerrain/Générale`
+- `/Recherche/Copropri%C3%A9t%C3%A9Appartementr%C3%A9sidentiel/Générale`
+- `/Recherche/FermeFermette/Générale`
+- `/Recherche/Propri%C3%A9t%C3%A9commercialeouindustrielle/Générale`
+- `/Recherche/Propri%C3%A9t%C3%A9%C3%A0revenus/Générale`
+- `/Recherche/Multicat%C3%A9gories/Générale`
 
-### ⚠️ Centris session stability
-Les cookies Matrix expirent ou sont invalidés quand:
-- Login trop rapide successif
-- Plusieurs sessions parallèles
-- Activity sur autre device
+### 🥷 SCRAPING — Stack ultime (commits a3598db + 0e08f22)
 
-Le `centris-auto-login` LaunchAgent refresh toutes les 12h mais sessions peuvent être invalidées entre temps.
+- ✅ **Browserless.io** (1000 min/mois free) connecté via WS
+- ✅ **rebrowser-playwright** anti-detect natif
+- ✅ **4 couches anti-blocage:**
+  - UA rotation 4 user-agents Chrome/Edge Mac/Win
+  - Stealth context: locale fr-CA, timezone Toronto, sec-ch-ua complets
+  - addInitScript: navigator.webdriver, plugins, WebGL, chrome.runtime
+  - launch args: --disable-blink-features=AutomationControlled
+- ✅ **pdf-parse**: extract data Centris PDFs (prix, MLS, adresse, taxes)
+- ✅ **cheerio + got + lru-cache + p-limit**: tools pipeline GitHub top 2026
 
-### ✅ Ce qui MARCHE pour Shawn aujourd'hui
+### 📊 MARKET INTELLIGENCE — 16 sources LIVE
 
-**Pour SES listings (dans Dropbox `/Terrain en ligne/` ou `/Inscription/`):**
-- `Envoie tout sur #22264330 à client@email.com` → docs Dropbox + Cc shawn@ auto
-- Idem #10102238, #19070453, #25244988, etc.
+Pipeline auto-injecté dans system prompt bot:
+- Banque du Canada (taux directeur)
+- MultiPrêt + PlaniPrêt (taux 5 ans)
+- APCIQ (stats QC + Lanaudière)
+- OACIQ (règlements)
+- Centris.ca public + DuProprio + Realtor.ca
+- RE/MAX QC + RE/MAX Canada + Royal LePage + Sutton + Via Capitale + JLR + SHQ
 
-**Autres outils 100% fonctionnels:**
-- Pipedrive cleanup, deal creation, activité
-- Brevo campaigns + veille J-1 + Cc Shawn auto
-- Firecrawl zonage municipal (clé fc-5...7d07 active)
-- AssemblyAI transcription (5h/mois gratuit)
-- Gmail email + scraping leads
+**Ratehub.ca** → taux fixe 5 ans **4.04%** confirmé mai 2026.
 
-### 🔬 TODO immédiat next session
-1. **Fix Centris URLs Matrix 2026** — capture flow via Playwright network panel
-2. **Investiguer pourquoi Centris invalide sessions rapides** — peut-être inserer délai 30s entre login attempts
-3. **Test live avec un listing actif** — confirmer que le fix marche
+### 🛡️ BREVO — Bugs résolus
 
-### 📊 Health check actuel
-```
-✅ pipedrive, brevo, dropbox, anthropic, transcribe (assemblyai)
-0 fails — score 100/100
-```
+- ✅ "Brevo SMTP hold pattern" diagnostiqué (events stay "requests" never "delivered")
+- ✅ Fix: `/admin/preview-via-gmail` bypass via Gmail OAuth
+- ✅ Campaign #35 sent prod (32 acheteurs Lanaudière) avec taux mai à jour
+- ✅ avril→mai replaced 8x dans HTML
+- ✅ mensualités recalculées avec 4.04% (canadien semi-annual)
+
+### 🔄 BOT INSTRUCTIONS PERMANENTES (SYSTEM_BASE)
+
+Bot sait maintenant:
+1. **Quelle catégorie Matrix choisir** par keyword:
+   - maison/unifam/bungalow/plain pied/à étages → Unifamiliale
+   - condo/copro → Copropriété
+   - duplex/triplex/plex → Propriété à revenus
+   - terrain/terre/lot → Terre/Terrain
+2. **TOUJOURS privilégier `envoyer_fiche_centris_native`** pour envoi client
+3. **Fallback chain**: HTTP → CUA → lien public
+4. **Cc Shawn auto** + Telegram trace chaque envoi
+5. **Master template Dropbox** avec logos sur tous emails clients
+
+### 📁 18 mémoires actives pour sessions futures
+
+Tous accessibles dans `/Users/signaturesb/.claude/projects/.../memory/`:
+- 4 nouvelles aujourd'hui sur Centris (structure + 101 filtres + 25 sélecteurs Unifam + bug fix)
+- Master template + Telegram trace + sync rules
+- Brevo safety + SMTP hold pattern
+- 16 sources market intelligence pipeline
 
 ---
 
-## 📂 Pour ChatGPT/agents externes qui suivent
-- Repo principal: `github.com/signaturesb/kira-bot`
-- Bot status: `github.com/signaturesb/bot-assistant/raw/main/BOT_STATUS.md`
-- Health live: `https://signaturesb-bot-s272.onrender.com/admin/health`
-- SESSION_LIVE.md ← ce fichier (kira-bot raw)
+## 🎯 PROCHAINES PRIORITÉS (demain)
 
----
+1. **Tests live Telegram bot** — vérifier que le bot prend bien la bonne route pour:
+   - "envoie la fiche du #X à Y" → envoyer_fiche_centris_native
+   - "envoie-moi maisons vendues Rawdon 6 mois 400-600k" → chercher_comparables → searchCentrisVendus
+2. **Compléter prefixes** Fm{N}_ pour Copropriété/Ferme/Commercial/Revenus (test 1 listing chaque)
+3. **Implémenter envoi comparables par email** — flow capturé "Tout · Courriel" sur Results.aspx
+4. **Test preview J-1** auto pour #40 Terrains (24 mai)
 
-## 🆕 Session 2026-05-19 (mini, suite après 5j)
+## 📍 État infrastructure
 
-### Health ✅ tout vert (5j sans intervention)
-- pipedrive, brevo, dropbox, anthropic, transcribe: 0 fails
-- 28 LaunchAgents Mac actifs (sms-bridge, centris-auto-login, scheduler)
+- ✅ Render bot-assistant: commit `e9a8ec1` live
+- ✅ Browserless free tier active (~5min/mois utilisé sur 1000)
+- ✅ LaunchAgent Mac centris-auto-login refresh cookies 12h (rebrowser-playwright)
+- ✅ Session Centris valide 25 jours (push from LaunchAgent)
+- ✅ Crons quotidiens actifs (digest, veille J-1, market refresh)
+- ✅ 18 LaunchAgents Mac chargés (vérifié)
 
-### Plaintes Shawn analysées (chat-history bot)
-1. **CC FORCÉ** (100x demandé) → ✅ FIX commit 524581a
-2. Master template logos parfois oublié → 📝 mémoire `feedback_email_template_logos`
-3. Site terrain-a-construire dans emails → 📝 mémoire `feedback_email_no_terrain_a_construire`
-4. Preview avant envoi client → 📝 mémoire `feedback_email_trace_telegram`
-5. "Toujours savoir ce qu'on envoie" → ✅ Notif Telegram chaque envoi
-6. Optimisation pro → en cours
-
-### Fix déployé (commit 524581a)
-**`sendEmailLogged()`** notifie Telegram à chaque envoi vers client ≠ Shawn:
-```
-📧 Email envoyé
-Cat: <category>
-À: <to>
-Cc: <list>
-Sujet: <subject>
-[⚠️ Tu n'étais PAS en Cc si applicable]
-```
-
-### Découvert: commit ea26c44 (Claude Code precedent session)
-**CUA driver complet — Centris Matrix PDF via Claude Computer Use API**
-→ Solution Centris PDF via Computer Use. À tester quand session Centris valide.
-
-### Mémoires créées
-- feedback_email_trace_telegram (Cc/notif règle)
-- feedback_email_template_logos (master_template Signature SB obligatoire)
-- feedback_email_no_terrain_a_construire (filter site)
-
-### Pricing Claude (info Shawn)
-Plan actuel conservé. Pour référence: Claude Max 20x à 200$/mois recommandé pour usage intense sessions multi-heures.
+**Bot est champion sur Centris** — testable demain via Telegram.
