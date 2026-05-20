@@ -1,5 +1,5 @@
 # ✅ Boot réussi
-_2026-05-20 11 h 59 min 10 s_
+_2026-05-20 12 h 04 min 13 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 63
@@ -44,15 +44,15 @@ INFO|CENTRIS-OAUTH|hop 0 302 → location: https://centris-prod.ca.auth0.com/aut
 INFO|CENTRIS-OAUTH|hop 1 → https://centris-prod.ca.auth0.com/authorize?client_id=x7YZXkUKRSCWB0X4hg0TT9oLw6fDw1W1&redirect_uri=https%3A%2F%2Faccoun
 INFO|CENTRIS-OAUTH|hop 1 302 → location: https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
 INFO|CENTRIS-OAUTH|hop 2 → https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
-INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=JbX37tUyChkm9Hb2XIYskDWLsU8AXKBr84LxH7DbHhE&state=0iDy4XFUV1nTvj0W
-INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=JbX37tUyChkm9Hb2XIYskDWLsU8AXKBr84LxH7DbHhE&state=0iDy4XFUV1nTvj0W
-INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=LCQMihuOrtC6lGhgDChDwZOGCAcZDYtH
-INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=LCQMihuOrtC6lGhgDChDwZOGCAcZDYtH
-INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SBaYkRKWUJlMUVwNnNqX1k1MTg2QUcxbEZrMGFGTnU1TKFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SBMQ1FNaWh1T
-INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBaYkRKWUJlMUVwNnNqX1k1MTg2QUcxbEZrMGFGTnU1TKFusG1mYS1h
-WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBaYkRKWUJlMUVw — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
-WARN|CENTRIS|OAuth flow échoué: Pas de form_post matrix après auth — fallback form-based
+INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=WcK2LBqLngA6uG3_qUhjuMw9IMJxMr1cjzByB54Tmb4&state=33SsYzC5qtC520-h
+INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=WcK2LBqLngA6uG3_qUhjuMw9IMJxMr1cjzByB54Tmb4&state=33SsYzC5qtC520-h
 OK|PREFLIGHT|✅ Claude API accepte les 63 tools
+INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=4iIf4o6zyC2dzxkeczzgxd5OoUKZfOUF
+INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=4iIf4o6zyC2dzxkeczzgxd5OoUKZfOUF
+INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SB2bDVNcUpUVDVpMEZFN3NNQ2tQZy00VFY4cC16b0pMZKFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SA0aUlmNG82e
+INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SB2bDVNcUpUVDVpMEZFN3NNQ2tQZy00VFY4cC16b0pMZKFusG1mYS1h
+WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SB2bDVNcUpUVDVp — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
+WARN|CENTRIS|OAuth flow échoué: Pas de form_post matrix après auth — fallback form-based
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
 OK|WEBHOOK|Sync OK (boot) — secret=set
@@ -62,5 +62,4 @@ OK|GIST|Dedup restauré: 22 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
 OK|BOOT|✅ Pre-flight: 9/9 OK
-OK|HEALTH|all green: pipedrive=✅ brevo=✅ dropbox=✅ anthropic=✅ transcribe=✅
 ```
