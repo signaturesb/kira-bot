@@ -1,5 +1,5 @@
 # Bot Signature SB — Rapport système
-_mercredi 20 mai 2026 à 13 h 59_
+_mercredi 20 mai 2026 à 14 h 08_
 
 ## Système
 - Modèle: `claude-sonnet-4-6` | Outils: 65
@@ -10,14 +10,14 @@ _mercredi 20 mai 2026 à 13 h 59_
 ## Pipeline (stats agrégées, sans identifier)
 - Deals actifs: 100
   - Étape 39: 18
-  - Étape 25: 24
+  - Étape 25: 25
   - Étape 31: 15
   - Étape 32: 1
   - 🗓 Visite prévue: 1
   - Étape 47: 6
   - Étape 24: 24
   - Étape 33: 1
-  - 🆕 Nouveau lead: 10
+  - 🆕 Nouveau lead: 9
 
 ## Ce mois
 - ✅ Gagnés: 1 | ❌ Perdus: 10
