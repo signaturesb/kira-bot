@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-05-20 12 h 04 min 13 s_
+_2026-05-20 12 h 15 min 45 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 63
-- Uptime: 20s
+- Uptime: 19s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -22,13 +22,13 @@ INFO|BOOT|Step 2b: refresh mailing plan (Brevo)
 INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
-OK|GIST|200 faits chargés
-OK|GIST|History restauré depuis Gist: 18 messages sur 1 chats (dernière save: 2026-05-20T15:40:12.605Z)
-INFO|BOOT|Step 5: load session live context
+OK|GIST|104 faits chargés
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
 OK|DBX_IDX|Index: 83 dossiers, 400 fichiers · 1s · 76 Centris# · 57 tokens rue
+OK|GIST|History restauré depuis Gist: 10 messages sur 1 chats (dernière save: 2026-05-20T16:14:02.503Z)
+INFO|BOOT|Step 5: load session live context
 OK|MAILING|Plan refreshed: 5 pending · 9 récentes
-OK|SYNC|SESSION_LIVE.md chargé depuis kira-bot (8KB, age 0h)
+OK|SYNC|SESSION_LIVE.md chargé depuis kira-bot (8KB, age 1h)
 INFO|BOOT|Step 5b: pre-warm master email template
 OK|TEMPLATE|Master template chargé 62KB
 OK|BOOT|Master template chargé (61.7 KB) — logos Signature SB + RE/MAX prêts
@@ -38,20 +38,20 @@ INFO|BOOT|Step 6: registerHandlers
 INFO|BOOT|Step 7: startDailyTasks
 OK|CRON|Tâches: visites 7h, digest 8h→Julie, sync BOT_STATUS chaque heure, monitoring 10min
 INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
-OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:200 — tools:63 — port:10000
+OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:104 — tools:63 — port:10000
 INFO|CENTRIS-OAUTH|hop 0 → https://accounts.centris.ca/connect/authorize?client_id=00DB706E-3B35-4CCA-8915-57DD3E1633E8&redirect_uri=https://matrix
 INFO|CENTRIS-OAUTH|hop 0 302 → location: https://centris-prod.ca.auth0.com/authorize?client_id=x7YZXkUKRSCWB0X4hg0TT9oLw6fDw1W1&redirect_uri=https%3A%2F%2Faccoun
 INFO|CENTRIS-OAUTH|hop 1 → https://centris-prod.ca.auth0.com/authorize?client_id=x7YZXkUKRSCWB0X4hg0TT9oLw6fDw1W1&redirect_uri=https%3A%2F%2Faccoun
 INFO|CENTRIS-OAUTH|hop 1 302 → location: https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
 INFO|CENTRIS-OAUTH|hop 2 → https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
-INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=WcK2LBqLngA6uG3_qUhjuMw9IMJxMr1cjzByB54Tmb4&state=33SsYzC5qtC520-h
-INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=WcK2LBqLngA6uG3_qUhjuMw9IMJxMr1cjzByB54Tmb4&state=33SsYzC5qtC520-h
+INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=VXKUs8uWbd0c6mhaM45Lx-F_-CXEs4gjeSM9G97n0_8&state=vVT6gZ7KVpw0Jphq
+INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=VXKUs8uWbd0c6mhaM45Lx-F_-CXEs4gjeSM9G97n0_8&state=vVT6gZ7KVpw0Jphq
+INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=p2ie0xHlQhnB5rlVFCD3ncRAQ_rWuuzH
+INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=p2ie0xHlQhnB5rlVFCD3ncRAQ_rWuuzH
 OK|PREFLIGHT|✅ Claude API accepte les 63 tools
-INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=4iIf4o6zyC2dzxkeczzgxd5OoUKZfOUF
-INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=4iIf4o6zyC2dzxkeczzgxd5OoUKZfOUF
-INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SB2bDVNcUpUVDVpMEZFN3NNQ2tQZy00VFY4cC16b0pMZKFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SA0aUlmNG82e
-INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SB2bDVNcUpUVDVpMEZFN3NNQ2tQZy00VFY4cC16b0pMZKFusG1mYS1h
-WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SB2bDVNcUpUVDVp — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
+INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SBCaTd0NVE0M1Y2VzJxakZOcmV6Tm5ZdEpFOXU5ZEVwYaFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SBwMmllMHhIb
+INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBCaTd0NVE0M1Y2VzJxakZOcmV6Tm5ZdEpFOXU5ZEVwYaFusG1mYS1h
+WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBCaTd0NVE0M1Y2 — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
 WARN|CENTRIS|OAuth flow échoué: Pas de form_post matrix après auth — fallback form-based
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
