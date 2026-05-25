@@ -1,5 +1,5 @@
 # ✅ Boot réussi
-_2026-05-20 17 h 32 min 41 s_
+_2026-05-25 15 h 19 min 47 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 65
@@ -16,18 +16,20 @@ OK|DROPBOX|Token rafraîchi ✓ (exp dans 240min)
 INFO|BOOT|Step 1b: load secrets (local persistent disk + Dropbox)
 INFO|SECRETS|Dossier /bot-secrets absent (normal si jamais utilisé)
 INFO|BOOT|Step 2: load Dropbox structure + index
-OK|DROPBOX|Structure: 83 listings (Terrain en ligne: 50, Inscription: 33), 5 sections
+OK|DROPBOX|Structure: 86 listings (Terrain en ligne: 53, Inscription: 33), 5 sections
 INFO|DBX_IDX|Paths à indexer: /Inscription | /Terrain en ligne
 INFO|BOOT|Step 2b: refresh mailing plan (Brevo)
 INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
-OK|GIST|109 faits chargés
-OK|GIST|History restauré depuis Gist: 4 messages sur 1 chats (dernière save: 2026-05-20T17:25:24.980Z)
+OK|GIST|126 faits chargés
+OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
+OK|DBX_IDX|Index: 86 dossiers, 428 fichiers · 1s · 73 Centris# · 59 tokens rue
+OK|GIST|History restauré depuis Gist: 12 messages sur 1 chats (dernière save: 2026-05-20T22:20:29.448Z)
 INFO|BOOT|Step 5: load session live context
-OK|SYNC|SESSION_LIVE.md chargé depuis kira-bot (10KB, age 5h)
-INFO|BOOT|Step 5b: pre-warm master email template
 OK|MAILING|Plan refreshed: 5 pending · 7 récentes
+OK|SYNC|SESSION_LIVE.md chargé depuis kira-bot (10KB, age 123h)
+INFO|BOOT|Step 5b: pre-warm master email template
 OK|TEMPLATE|Master template chargé 62KB
 OK|BOOT|Master template chargé (61.7 KB) — logos Signature SB + RE/MAX prêts
 OK|POLLER|Intervalle polling: 30s (quasi-instantané)
@@ -36,29 +38,28 @@ INFO|BOOT|Step 6: registerHandlers
 INFO|BOOT|Step 7: startDailyTasks
 OK|CRON|Tâches: visites 7h, digest 8h→Julie, sync BOT_STATUS chaque heure, monitoring 10min
 INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
-OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:109 — tools:65 — port:10000
+OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:126 — tools:65 — port:10000
 INFO|CENTRIS-OAUTH|hop 0 → https://accounts.centris.ca/connect/authorize?client_id=00DB706E-3B35-4CCA-8915-57DD3E1633E8&redirect_uri=https://matrix
 INFO|CENTRIS-OAUTH|hop 0 302 → location: https://centris-prod.ca.auth0.com/authorize?client_id=x7YZXkUKRSCWB0X4hg0TT9oLw6fDw1W1&redirect_uri=https%3A%2F%2Faccoun
 INFO|CENTRIS-OAUTH|hop 1 → https://centris-prod.ca.auth0.com/authorize?client_id=x7YZXkUKRSCWB0X4hg0TT9oLw6fDw1W1&redirect_uri=https%3A%2F%2Faccoun
-OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
-OK|DBX_IDX|Index: 83 dossiers, 400 fichiers · 4s · 76 Centris# · 57 tokens rue
 INFO|CENTRIS-OAUTH|hop 1 302 → location: https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
 INFO|CENTRIS-OAUTH|hop 2 → https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
-INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=4xvFHFHYp_YmE554ZjFoQi16s4m0G8ou2TtWRD2Al3c&state=lfqSGuZ075sVNJjR
-INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=4xvFHFHYp_YmE554ZjFoQi16s4m0G8ou2TtWRD2Al3c&state=lfqSGuZ075sVNJjR
-INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=WAOt8wjH_nEnbQWxFcfJguQuVdprvHnH
-INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=WAOt8wjH_nEnbQWxFcfJguQuVdprvHnH
-INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SBhUXdKNDc0cU8yWWZfeE1pRmsya2M4d0pZZjQ2V2dwMKFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SBXQU90OHdqS
-INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBhUXdKNDc0cU8yWWZfeE1pRmsya2M4d0pZZjQ2V2dwMKFusG1mYS1h
-WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBhUXdKNDc0cU8y — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
+INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=aY-Ab8Swq5BpWNHtWupPkJf_Ro5I9vHzOy3_04E_ntA&state=ZAm8JLxIzzSyG3Vp
+INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=aY-Ab8Swq5BpWNHtWupPkJf_Ro5I9vHzOy3_04E_ntA&state=ZAm8JLxIzzSyG3Vp
+INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=Sw-eL6x4aSjZIUCc9n0A0cc-qa-QQ4Ef
+INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=Sw-eL6x4aSjZIUCc9n0A0cc-qa-QQ4Ef
+INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SBFZU1rdllxaDJkeXNDanhJWERzV3BEVVZ6SnZlSnFDVqFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SBTdy1lTDZ4N
+INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBFZU1rdllxaDJkeXNDanhJWERzV3BEVVZ6SnZlSnFDVqFusG1mYS1h
+WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBFZU1rdllxaDJk — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
 WARN|CENTRIS|OAuth flow échoué: Pas de form_post matrix après auth — fallback form-based
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
 OK|PREFLIGHT|✅ Claude API accepte les 65 tools
 OK|WEBHOOK|Sync OK (boot) — secret=set
 INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
-OK|GIST|Poller state restauré: 418 processed, 125 leads
-OK|GIST|Dedup restauré: 17 entries
+OK|GIST|Poller state restauré: 472 processed, 135 leads
+OK|GIST|Dedup restauré: 15 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
+OK|BOOT|✅ Pre-flight: 9/9 OK
 ```
