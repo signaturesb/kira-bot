@@ -3,7 +3,7 @@ _lundi 1 juin 2026 à 19 h 59_
 
 ## Système
 - Modèle: `claude-sonnet-4-6` | Outils: 65
-- Uptime: 360min
+- Uptime: 0min
 - Gmail Poller: 164 leads traités (cumul)
 - Dropbox: 88 terrains en cache
 
