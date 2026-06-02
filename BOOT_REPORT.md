@@ -1,5 +1,5 @@
 # ✅ Boot réussi
-_2026-06-02 11 h 03 min 57 s_
+_2026-06-02 11 h 04 min 50 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 65
@@ -40,23 +40,23 @@ OK|CRON|Tâches: visites 7h, digest 8h→Julie, sync BOT_STATUS chaque heure, mo
 INFO|BOOT|Step 8: configuration WEBHOOK Telegram (auto-healing bulletproof)
 OK|BOOT|✅ Kira démarrée [claude-sonnet-4-6] — /tmp — mémos:169 — tools:65 — port:10000
 INFO|CENTRIS-OAUTH|hop 0 → https://accounts.centris.ca/connect/authorize?client_id=00DB706E-3B35-4CCA-8915-57DD3E1633E8&redirect_uri=https://matrix
-OK|PREFLIGHT|✅ Claude API accepte les 65 tools
 INFO|CENTRIS-OAUTH|hop 0 302 → location: https://centris-prod.ca.auth0.com/authorize?client_id=x7YZXkUKRSCWB0X4hg0TT9oLw6fDw1W1&redirect_uri=https%3A%2F%2Faccoun
 INFO|CENTRIS-OAUTH|hop 1 → https://centris-prod.ca.auth0.com/authorize?client_id=x7YZXkUKRSCWB0X4hg0TT9oLw6fDw1W1&redirect_uri=https%3A%2F%2Faccoun
 INFO|CENTRIS-OAUTH|hop 1 302 → location: https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
 INFO|CENTRIS-OAUTH|hop 2 → https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
-INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=NHvhTi0OMrBsmDS0ziNFR-a4eXsN4KzJAma0uI9SLlE&state=GL1nchXmGAK3jle6
-INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=NHvhTi0OMrBsmDS0ziNFR-a4eXsN4KzJAma0uI9SLlE&state=GL1nchXmGAK3jle6
-OK|WEBHOOK|Sync OK (boot) — secret=set
-INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
-INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=sE8ElVvJUABZG8amAkCscLIt3k6s_iyF
-INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=sE8ElVvJUABZG8amAkCscLIt3k6s_iyF
-INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SBWTWo1OXYwQWx2TVpmemVDVWlzcUtTX25kSXcwZWQyN6FusG1mYS1hdXRoZW50aWNhdGWjdGlk2SBzRThFbFZ2S
-INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBWTWo1OXYwQWx2TVpmemVDVWlzcUtTX25kSXcwZWQyN6FusG1mYS1h
-WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBWTWo1OXYwQWx2 — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
+INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=YY6Hdry3rVGduIf6j8EAcVqVqmu--VfeO_Ps5Xh6FEY&state=ev2f9ba-qU24of4X
+INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=YY6Hdry3rVGduIf6j8EAcVqVqmu--VfeO_Ps5Xh6FEY&state=ev2f9ba-qU24of4X
+INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=K8bg_xz8p-iTHZu0g_OxOJDHK1pjg8zA
+INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=K8bg_xz8p-iTHZu0g_OxOJDHK1pjg8zA
+INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SBaY0o1Y0U1RHZSdXNIUHBpNXE2a3FHUk5XZFlFaHZaaKFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SBLOGJnX3h6O
+INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBaY0o1Y0U1RHZSdXNIUHBpNXE2a3FHUk5XZFlFaHZaaKFusG1mYS1h
+WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBaY0o1Y0U1RHZS — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
 WARN|CENTRIS|OAuth flow échoué: Pas de form_post matrix après auth — fallback form-based
+OK|PREFLIGHT|✅ Claude API accepte les 65 tools
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
+OK|WEBHOOK|Sync OK (boot) — secret=set
+INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
 OK|GIST|Poller state restauré: 500 processed, 164 leads
 OK|GIST|Dedup restauré: 37 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
