@@ -1,9 +1,9 @@
 # Bot Signature SB — Rapport système
-_mardi 16 juin 2026 à 03 h 17_
+_mardi 16 juin 2026 à 04 h 17_
 
 ## Système
 - Modèle: `claude-sonnet-4-6` | Outils: 65
-- Uptime: 1080min
+- Uptime: 1140min
 - Gmail Poller: 191 leads traités (cumul)
 - Dropbox: 76 terrains en cache
 
