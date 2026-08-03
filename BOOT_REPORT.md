@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-08-03 09 h 09 min 52 s_
+_2026-08-03 09 h 10 min 48 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 65
-- Uptime: 21s
+- Uptime: 19s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -25,9 +25,9 @@ INFO|BOOT|Step 4: load memory + history
 OK|GIST|200 faits chargés
 OK|GIST|History restauré depuis Gist: 4 messages sur 1 chats (dernière save: 2026-08-02T15:32:31.766Z)
 INFO|BOOT|Step 5: load session live context
-OK|MAILING|Plan refreshed: 8 pending · 8 récentes
 OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
-OK|DBX_IDX|Index: 102 dossiers, 623 fichiers · 2s · 89 Centris# · 72 tokens rue
+OK|DBX_IDX|Index: 102 dossiers, 623 fichiers · 1s · 89 Centris# · 72 tokens rue
+OK|MAILING|Plan refreshed: 8 pending · 8 récentes
 OK|SYNC|SESSION_LIVE.md chargé depuis bot-assistant (2KB, age 1508h)
 INFO|BOOT|Step 5b: pre-warm master email template
 OK|TEMPLATE|Master template chargé 62KB
@@ -44,13 +44,13 @@ INFO|CENTRIS-OAUTH|hop 0 302 → location: https://centris-prod.ca.auth0.com/aut
 INFO|CENTRIS-OAUTH|hop 1 → https://centris-prod.ca.auth0.com/authorize?client_id=x7YZXkUKRSCWB0X4hg0TT9oLw6fDw1W1&redirect_uri=https%3A%2F%2Faccoun
 INFO|CENTRIS-OAUTH|hop 1 302 → location: https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
 INFO|CENTRIS-OAUTH|hop 2 → https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
-INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=MStliJ1FJ4NBc3HVWAgx3U8urvfzAMBrYpOGl9p9tuk&state=Q5xyxLhESOxomh1g
-INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=MStliJ1FJ4NBc3HVWAgx3U8urvfzAMBrYpOGl9p9tuk&state=Q5xyxLhESOxomh1g
-INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=QsoG4I10F7lxVfTzd49PolGXMaxQb1bY
-INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=QsoG4I10F7lxVfTzd49PolGXMaxQb1bY
-INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SBEVjFJaHQ2cDR0c0o1dW9Fb1dONVZyLTZydjdGVkhpRaFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SBRc29HNEkxM
-INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBEVjFJaHQ2cDR0c0o1dW9Fb1dONVZyLTZydjdGVkhpRaFusG1mYS1h
-WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBEVjFJaHQ2cDR0 — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
+INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=KeLXjfzXllSzDgEmIzzzNce6PFAUEGd_fSkFyCqQYp0&state=GeZZqv76jgh2IT5x
+INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=KeLXjfzXllSzDgEmIzzzNce6PFAUEGd_fSkFyCqQYp0&state=GeZZqv76jgh2IT5x
+INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=-uaWvf4O7Rv3xo2n6Q67tXD_DPyks8eh
+INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=-uaWvf4O7Rv3xo2n6Q67tXD_DPyks8eh
+INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SBtbEZEUnlYaFJGaklfOEc5a0NDc2p0aGF0anBYSWxXUaFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SAtdWFXdmY0T
+INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBtbEZEUnlYaFJGaklfOEc5a0NDc2p0aGF0anBYSWxXUaFusG1mYS1h
+WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SBtbEZEUnlYaFJG — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
 WARN|CENTRIS|OAuth flow échoué: Pas de form_post matrix après auth — fallback form-based
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
