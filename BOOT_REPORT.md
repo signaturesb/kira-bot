@@ -1,9 +1,9 @@
 # ✅ Boot réussi
-_2026-08-10 09 h 10 min 46 s_
+_2026-08-17 09 h 09 min 48 s_
 
 - Modèle: claude-sonnet-4-6
 - Outils: 65
-- Uptime: 20s
+- Uptime: 19s
 - Centris: ⏳
 - Dropbox: ✅
 
@@ -16,19 +16,19 @@ OK|DROPBOX|Token rafraîchi ✓ (exp dans 240min)
 INFO|BOOT|Step 1b: load secrets (local persistent disk + Dropbox)
 INFO|SECRETS|Dossier /bot-secrets absent (normal si jamais utilisé)
 INFO|BOOT|Step 2: load Dropbox structure + index
-OK|DROPBOX|Structure: 105 listings (Terrain en ligne: 64, Inscription: 41), 5 sections
+OK|DROPBOX|Structure: 105 listings (Terrain en ligne: 65, Inscription: 40), 5 sections
 INFO|DBX_IDX|Paths à indexer: /Inscription | /Terrain en ligne
 INFO|BOOT|Step 2b: refresh mailing plan (Brevo)
 INFO|BOOT|Step 3: init Gist
 OK|GIST|Configuré: a9a1a92fef67d6d3d7bddeaed5359f44
 INFO|BOOT|Step 4: load memory + history
 OK|GIST|200 faits chargés
-OK|GIST|History restauré depuis Gist: 22 messages sur 1 chats (dernière save: 2026-08-08T18:01:42.995Z)
+OK|GIST|History restauré depuis Gist: 28 messages sur 1 chats (dernière save: 2026-08-16T23:26:16.124Z)
 INFO|BOOT|Step 5: load session live context
-OK|DBX_IDX|1 dossiers fusionnés cross-source (même Centris#/adresse)
-OK|DBX_IDX|Index: 105 dossiers, 640 fichiers · 1s · 92 Centris# · 74 tokens rue
-OK|MAILING|Plan refreshed: 8 pending · 8 récentes
-OK|SYNC|SESSION_LIVE.md chargé depuis bot-assistant (2KB, age 1676h)
+OK|DBX_IDX|2 dossiers fusionnés cross-source (même Centris#/adresse)
+OK|DBX_IDX|Index: 104 dossiers, 625 fichiers · 1s · 91 Centris# · 74 tokens rue
+OK|MAILING|Plan refreshed: 10 pending · 8 récentes
+OK|SYNC|SESSION_LIVE.md chargé depuis bot-assistant (2KB, age 1844h)
 INFO|BOOT|Step 5b: pre-warm master email template
 OK|TEMPLATE|Master template chargé 62KB
 OK|BOOT|Master template chargé (61.7 KB) — logos Signature SB + RE/MAX prêts
@@ -44,23 +44,21 @@ INFO|CENTRIS-OAUTH|hop 0 302 → location: https://centris-prod.ca.auth0.com/aut
 INFO|CENTRIS-OAUTH|hop 1 → https://centris-prod.ca.auth0.com/authorize?client_id=x7YZXkUKRSCWB0X4hg0TT9oLw6fDw1W1&redirect_uri=https%3A%2F%2Faccoun
 INFO|CENTRIS-OAUTH|hop 1 302 → location: https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
 INFO|CENTRIS-OAUTH|hop 2 → https://accounts.centris.ca/connect/authorize?redirect_uri=https%3A%2F%2Fcentris-prod.ca.auth0.com%2Flogin%2Fcallback&re
-INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=WzseWO4YeGOidRuSutY9UVL7bAk7NTsyqTfFSDpoy2s&state=fHoSGQJvQoE-lknS
-INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=WzseWO4YeGOidRuSutY9UVL7bAk7NTsyqTfFSDpoy2s&state=fHoSGQJvQoE-lknS
-INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=MIN6-5aCF-WanmcZtumqyHy__46oOzzn
-INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=MIN6-5aCF-WanmcZtumqyHy__46oOzzn
-INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SAyYUs0NGlVU0tJTUppcGNmQW13QkxhM01LSl8tOW9YNKFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SBNSU42LTVhQ
-INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SAyYUs0NGlVU0tJTUppcGNmQW13QkxhM01LSl8tOW9YNKFusG1mYS1h
-WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SAyYUs0NGlVU0tJ — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
+INFO|CENTRIS-OAUTH|hop 2 302 → location: https://centris-prod.ca.auth0.com/login/callback?code=S75LH5AGRcnxAK0YUj8kDJeFR4Q6mcSJWPQVPmN2Tk4&state=islMdFoiwMYbFWNz
+INFO|CENTRIS-OAUTH|hop 3 → https://centris-prod.ca.auth0.com/login/callback?code=S75LH5AGRcnxAK0YUj8kDJeFR4Q6mcSJWPQVPmN2Tk4&state=islMdFoiwMYbFWNz
+INFO|CENTRIS-OAUTH|hop 3 302 → location: /authorize/resume?state=kDG2AfIv1rzz4_B_HDlEIRt3mtUkSwdc
+INFO|CENTRIS-OAUTH|hop 4 → https://centris-prod.ca.auth0.com/authorize/resume?state=kDG2AfIv1rzz4_B_HDlEIRt3mtUkSwdc
+OK|WEBHOOK|Sync OK (boot) — secret=set
+INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
+INFO|CENTRIS-OAUTH|hop 4 302 → location: /u/mfa-sms-challenge?state=hKFo2SA1ZDE1eFlsT0hpWVFrSUZZSWhnOHROUi02elVDZi01VKFusG1mYS1hdXRoZW50aWNhdGWjdGlk2SBrREcyQWZJd
+INFO|CENTRIS-OAUTH|hop 5 → https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SA1ZDE1eFlsT0hpWVFrSUZZSWhnOHROUi02elVDZi01VKFusG1mYS1h
+WARN|CENTRIS-OAUTH|hop 5 STUCK at https://centris-prod.ca.auth0.com/u/mfa-sms-challenge?state=hKFo2SA1ZDE1eFlsT0hp — HTML: <!DOCTYPE html> <html lang="fr-CA"> <head> <meta charset="utf-8"> <meta http-equiv="X-UA-Compatible" content="IE=edge"> <meta name="viewport" content="width=device-width, initial-scale=1"> <meta name=
 WARN|CENTRIS|OAuth flow échoué: Pas de form_post matrix après auth — fallback form-based
 WARN|CENTRIS|Login: HTTP 200 — location: 
 WARN|CENTRIS|Pré-login échoué — retry automatique à la première requête
 OK|PREFLIGHT|✅ Claude API accepte les 65 tools
-OK|WEBHOOK|Sync OK (boot) — secret=set
-INFO|AUDIT|webhook/synced {"reason":"boot","hasSecret":true}
-OK|GIST|Poller state restauré: 500 processed, 428 leads
-OK|GIST|Dedup restauré: 30 entries
+OK|GIST|Poller state restauré: 500 processed, 470 leads
+OK|GIST|Dedup restauré: 44 entries
 INFO|BOOT|Boot catch-up scan 4h — récupération leads pendant redeploy
 OK|GMAIL|Token rafraîchi ✓
-OK|BOOT|✅ Pre-flight: 8/9 OK
-INFO|AUDIT|boot/preflight_issues {"failed":[{"label":"Pipedrive API","detail":"échec"}]}
 ```
