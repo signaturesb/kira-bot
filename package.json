@@ -23,7 +23,7 @@
     "install-playwright": "npx playwright install chromium --with-deps"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.115.0",
+    "@anthropic-ai/sdk": "^0.117.1",
     "dotenv": "^16.0.0",
     "node-telegram-bot-api": "^0.67.0",
     "pdf-lib": "^1.17.1"
