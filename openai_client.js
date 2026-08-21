@@ -12,7 +12,9 @@ async function askOpenAI(input, options = {}) {
   const text = String(input || '').trim();
   if (!text) throw new Error('Écris ta question après /gpt');
 
-  const model = options.model || process.env.OPENAI_MODEL || 'gpt-5.4';
+  // Terra = meilleur équilibre intelligence/coût pour usage quotidien.
+  // OPENAI_MODEL permet de passer à gpt-5.6-sol pour les tâches premium sans modifier le code.
+  const model = options.model || process.env.OPENAI_MODEL || 'gpt-5.6-terra';
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 90000);
 
