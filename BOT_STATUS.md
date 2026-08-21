@@ -1,5 +1,5 @@
 # Bot Signature SB — Rapport système
-_vendredi 21 août 2026 à 02 h 01_
+_vendredi 21 août 2026 à 02 h 44_
 
 ## Système
 - Modèle: `claude-sonnet-4-6` | Outils: 65
@@ -8,10 +8,20 @@ _vendredi 21 août 2026 à 02 h 01_
 - Dropbox: 106 terrains en cache
 
 ## Pipeline (stats agrégées, sans identifier)
-- Deals actifs: 0
+- Deals actifs: 100
+  - Étape 28: 2
+  - Étape 39: 18
+  - Étape 25: 20
+  - Étape 31: 13
+  - Étape 32: 1
+  - 🗓 Visite prévue: 1
+  - Étape 47: 5
+  - Étape 24: 17
+  - 🆕 Nouveau lead: 22
+  - ✅ Gagné: 1
 
 ## Ce mois
-- ✅ Gagnés: 0 | ❌ Perdus: 0
+- ✅ Gagnés: 1 | ❌ Perdus: 1
 - 📅 Visites à venir (count): 0
 
 > Privacy: ce fichier est public. Aucun nom/email/téléphone client.
