@@ -4,7 +4,7 @@
   "description": "Kira — assistante IA de Shawn via Telegram",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js",
+    "start": "node bootstrap.js",
     "validate": "node validate.js",
     "diagnose": "node diagnose.js",
     "fix": "node fix.js",
